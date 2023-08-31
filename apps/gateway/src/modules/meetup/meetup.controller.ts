@@ -8,6 +8,7 @@ export class MeetupController {
   @Get()
   async getHello(): Promise<string> {
     const helloValue = await this.meetupService.getHello();
+
     return helloValue;
   }
 }
