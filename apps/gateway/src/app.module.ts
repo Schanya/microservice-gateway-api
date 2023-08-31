@@ -1,10 +1,18 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { MeetupModule } from './modules/meetup/meetup.module';
+import { ConfigModule } from '@nestjs/config';
+import { envValidationSchema } from './common/schemas/env-validation.schema';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      validationSchema: envValidationSchema,
+      envFilePath: './apps/gateway/.env',
+    }),
+    MeetupModule,
+  ],
+  controllers: [],
+  providers: [],
 })
 export class AppModule {}

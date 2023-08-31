@@ -1,18 +1,17 @@
 import { Module } from '@nestjs/common';
+import { ClientsModule } from '@nestjs/microservices';
+import { MEETUP_CLIENT_OPTIONS } from '../../common/constants/microservice.constants';
 import { MeetupController } from './meetup.controller';
 import { MeetupService } from './meetup.service';
-import { ConfigModule } from '@nestjs/config';
-import { envValidationSchema } from '../common/schemas/env-validation.schema';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      validationSchema: envValidationSchema,
-      envFilePath: './apps/meetup/.env',
+    ClientsModule.register({
+      clients: [MEETUP_CLIENT_OPTIONS],
     }),
   ],
   controllers: [MeetupController],
   providers: [MeetupService],
+  exports: [MeetupService],
 })
 export class MeetupModule {}
