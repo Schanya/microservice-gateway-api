@@ -13,7 +13,7 @@ services:
       dockerfile: ./apps/meetup/Dockerfile
     command: npm run start:dev meetup
     env_file:
-      - ./apps/meetup/.env
+      - ./apps/meetup/.envDocker
     depends_on:
       - postgres
       - rabbitmq
@@ -29,7 +29,7 @@ services:
       dockerfile: ./apps/gateway/Dockerfile
     command: npm run start:dev gateway
     env_file:
-      - ./apps/gateway/.env
+      - ./apps/gateway/.envDocker
     depends_on:
       - meetup
       - rabbitmq
