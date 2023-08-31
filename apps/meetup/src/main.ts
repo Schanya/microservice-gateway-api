@@ -12,6 +12,7 @@ async function bootstrap() {
   const app = await NestFactory.createMicroservice(MeetupModule, {
     transport: Transport.RMQ,
     options: {
+      port: 4000,
       urls: [process.env.RABBIT_MQ_URI],
       queue: process.env.QUEUE_MEETUP_SERVICE,
       queueOptions: {
