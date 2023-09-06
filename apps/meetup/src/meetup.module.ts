@@ -4,6 +4,7 @@ import { MeetupService } from './meetup.service';
 import { ConfigModule } from '@nestjs/config';
 import { envValidationSchema } from '../common/schemas/env-validation.schema';
 import { RmqModule } from '@app/common';
+import { DatabaseModule } from '@app/common';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { RmqModule } from '@app/common';
       envFilePath: './apps/meetup/.env',
     }),
     RmqModule,
+    DatabaseModule,
   ],
   controllers: [MeetupController],
   providers: [MeetupService],

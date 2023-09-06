@@ -17,7 +17,9 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./apps/gateway/test/jest-e2e.json"
+    "test:e2e": "jest --config ./apps/gateway/test/jest-e2e.json",
+    "prisma:meetup:client": "npx prisma generate --schema ./apps/meetup/prisma/schema.prisma",
+    "prisma:meetup:migrate": "dotenv -e ./apps/meetup/.env -- npx prisma migrate dev --schema=./apps/meetup/prisma/schema.prisma"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -80,5 +82,8 @@
     "moduleNameMapper": {
       "^@app/common(|/.*)$": "<rootDir>/libs/common/src/$1"
     }
+  },
+  "prisma": {
+    "seed": "dotenv -e ./apps/meetup/.env -- ts-node --esm ./apps/meetup/prisma/seeds/seed.ts"
   }
 }

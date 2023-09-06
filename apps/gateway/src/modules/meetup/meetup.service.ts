@@ -16,4 +16,12 @@ export class MeetupService {
       data: 'Anna',
     });
   }
+
+  public async getTags(): Promise<any> {
+    return await sendMessage({
+      client: this.client,
+      metadata: 'getTags',
+      data: '',
+    });
+  }
 }

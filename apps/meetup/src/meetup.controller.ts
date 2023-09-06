@@ -10,4 +10,9 @@ export class MeetupController {
   getHello(name: string): string {
     return this.meetupService.getHello(name);
   }
+
+  @MessagePattern('getTags')
+  getTags(): any {
+    return this.meetupService.getTags();
+  }
 }

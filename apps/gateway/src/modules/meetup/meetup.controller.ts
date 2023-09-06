@@ -11,4 +11,11 @@ export class MeetupController {
 
     return helloValue;
   }
+
+  @Get('/tags')
+  async getTags(): Promise<any> {
+    const tags = await this.meetupService.getTags();
+
+    return tags;
+  }
 }
