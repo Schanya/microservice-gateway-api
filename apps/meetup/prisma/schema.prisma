@@ -12,7 +12,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Meetups {
+  id          Int    @id @unique @default(autoincrement())
+  title       String
+  description String
+  date        String
+  place       String
+
+  tags MeetupsToTags[]
+  // members     Members[]
+  // organizerId Int
+}
+
 model Tags {
-  id    Int    @id @unique @default(autoincrement())
-  title String @unique
+  id      Int             @id @unique @default(autoincrement())
+  title   String          @unique
+  meetups MeetupsToTags[]
+}
+
+model MeetupsToTags {
+  id Int @id @unique @default(autoincrement())
+
+  meetup   Meetups @relation(fields: [meetupId], references: [id])
+  meetupId Int
+
+  tag   Tags @relation(fields: [tagId], references: [id])
+  tagId Int
 }
