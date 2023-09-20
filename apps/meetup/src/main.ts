@@ -4,12 +4,12 @@ config();
 import { RmqService } from '@app/common';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { MeetupModule } from './meetup.module';
+import { MicroserviceModule } from './microservice.module';
 
 const logger = new Logger('Meetup');
 
 async function bootstrap() {
-  const app = await NestFactory.create(MeetupModule);
+  const app = await NestFactory.create(MicroserviceModule);
 
   const rmqService = app.get<RmqService>(RmqService);
 

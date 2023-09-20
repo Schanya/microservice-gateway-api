@@ -1,3 +1,4 @@
+import { MeetupFrontend } from '@app/common';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { sendMessage } from '../../common/utils/send-message.util';
@@ -9,19 +10,13 @@ export class MeetupService {
     private readonly client: ClientProxy,
   ) {}
 
-  public async getHello(): Promise<string> {
-    return await sendMessage({
+  async readById(id: string): Promise<MeetupFrontend> {
+    const meetup: MeetupFrontend = await sendMessage({
       client: this.client,
-      metadata: 'getHello',
-      data: 'Anna',
+      metadata: 'MEETUP_GET_BY_ID',
+      data: { id },
     });
-  }
 
-  public async getTags(): Promise<any> {
-    return await sendMessage({
-      client: this.client,
-      metadata: 'getTags',
-      data: '',
-    });
+    return meetup;
   }
 }
