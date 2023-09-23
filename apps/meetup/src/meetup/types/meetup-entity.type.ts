@@ -1,4 +1,4 @@
-import { Tag } from './tag-entity.type';
+import { Tag } from '../../tag/dto';
 
 export class Meetup {
   id: number | string;
