@@ -1,13 +1,13 @@
-import { Meetup } from 'apps/meetup/src/meetup/dto/meetup-entity.dto';
+import { Meetup } from '../dto';
 
-export class MeetupFrontend {
-  id: number | string;
+export class FrontendMeetup {
+  id: number;
   title: string;
   description: string;
   date: string;
   place: string;
   tags?: {
-    id?: number | string;
+    id?: number;
     title?: string;
   }[];
 
@@ -17,7 +17,6 @@ export class MeetupFrontend {
     this.description = meetup?.description;
     this.date = meetup?.date;
     this.place = meetup?.place;
-    //     this.organiserId = meetup?.organizerId;
     this.tags = meetup?.tags?.map((obj) => ({
       id: obj.tag.id,
       title: obj.tag.title,
