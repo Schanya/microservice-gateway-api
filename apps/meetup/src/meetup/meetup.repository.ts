@@ -1,15 +1,15 @@
 import { PrismaService } from '@app/common';
 import { Injectable } from '@nestjs/common';
 
-import { CreateTagDto, Tag } from '../tag/dto';
-import { TagService } from '../tag/tag.service';
+import { Tag } from '../tag/dto';
+import { TagRepository } from '../tag/tag.repository';
 import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
 
 @Injectable()
 export class MeetupRepository {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly tagService: TagService,
+    private readonly tagRepository: TagRepository,
   ) {}
 
   async create(createMeetupDto: CreateMeetupDto): Promise<Meetup> {
@@ -81,15 +81,15 @@ export class MeetupRepository {
     });
   }
 
-  private async _getAndCreateTags(
-    createTagsDto: CreateTagDto[],
-  ): Promise<Tag[]> {
+  private async _getAndCreateTags(createTagsDto: string[]): Promise<Tag[]> {
     const tags: Tag[] = [];
 
     for await (const createTagDto of createTagsDto) {
-      const existingTag = await this.tagService.readBy({ ...createTagDto });
+      const existingTag = await this.tagRepository.readBy({
+        title: createTagDto,
+      });
       if (!existingTag) {
-        tags.push(await this.tagService.create({ ...createTagDto }));
+        tags.push(await this.tagRepository.create({ title: createTagDto }));
         continue;
       }
 

@@ -1,7 +1,6 @@
-import { Controller } from '@nestjs/common';
+import { Controller, ParseIntPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { MeetupService } from './meetup.service';
-import { MeetupFrontend } from '@app/common';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
 import { FrontendMeetup } from './types/fronted-meetup.type';
 
@@ -18,14 +17,16 @@ export class MeetupController {
   }
 
   @MessagePattern('MEETUP_GET_BY_ID')
-  async readById(@Payload('id') id: number): Promise<MeetupFrontend> {
+  async readById(
+    @Payload('id', ParseIntPipe) id: number,
+  ): Promise<FrontendMeetup> {
     const meetup = await this.meetupService.readById(id);
-    return new MeetupFrontend(meetup);
+    return new FrontendMeetup(meetup);
   }
 
   @MessagePattern('MEETUP_UPDATE')
   async update(
-    @Payload('id') id: number,
+    @Payload('id', ParseIntPipe) id: number,
     @Payload('updateMeetupDto') updateMeetupDto: UpdateMeetupDto,
   ): Promise<FrontendMeetup> {
     const updatedMeetup = await this.meetupService.update(id, updateMeetupDto);
@@ -33,7 +34,7 @@ export class MeetupController {
   }
 
   @MessagePattern('MEETUP_DELETE')
-  async deleteById(@Payload('id') id: number): Promise<string> {
+  async deleteById(@Payload('id', ParseIntPipe) id: number): Promise<string> {
     await this.meetupService.delete(id);
     return 'sucess';
   }

@@ -21,7 +21,7 @@ export class TagService {
     return existingTag;
   }
 
-  //only for unique fields
+  //only for uniqu fields
   async readBy(options: FindTagDto): Promise<Tag> {
     const tag = await this.tagRepository.readBy(options);
 
