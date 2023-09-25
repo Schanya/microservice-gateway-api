@@ -84,6 +84,8 @@ export class MeetupRepository {
   private async _getAndCreateTags(createTagsDto: string[]): Promise<Tag[]> {
     const tags: Tag[] = [];
 
+    if (!createTagsDto) return tags;
+
     for await (const createTagDto of createTagsDto) {
       const existingTag = await this.tagRepository.readBy({
         title: createTagDto,
