@@ -15,11 +15,11 @@ export class TagRepository {
   }
 
   async readBy(options: FindTagDto): Promise<Tag> {
-    const tag = await this.prisma.tags.findMany({
+    const tags = await this.prisma.tags.findMany({
       where: { ...options },
-    })[0];
+    });
 
-    return tag;
+    return tags.length ? tags[0] : null;
   }
 
   async update(id: number, updateTagDto: UpdateTagDto): Promise<Tag> {

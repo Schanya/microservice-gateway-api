@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { MeetupModule } from './modules/meetup/meetup.module';
 import { ConfigModule } from '@nestjs/config';
 import { envValidationSchema } from './common/schemas/env-validation.schema';
+import { AllExceptionsFilter } from '@app/common';
+import { APP_FILTER } from '@nestjs/core';
 
 @Module({
   imports: [
@@ -13,6 +15,11 @@ import { envValidationSchema } from './common/schemas/env-validation.schema';
     MeetupModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: AllExceptionsFilter,
+    },
+  ],
 })
 export class AppModule {}
