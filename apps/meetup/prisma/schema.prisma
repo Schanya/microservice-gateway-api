@@ -1,0 +1,41 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./../../../node_modules/@prisma-meetup/client"
+  binaryTargets = ["native", "linux-arm64-openssl-1.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Meetups {
+  id          Int    @id @unique @default(autoincrement())
+  title       String
+  description String
+  date        String
+  place       String
+
+  tags MeetupsToTags[]
+  // members     Members[]
+  // organizerId Int
+}
+
+model Tags {
+  id      Int             @id @unique @default(autoincrement())
+  title   String          @unique
+  meetups MeetupsToTags[]
+}
+
+model MeetupsToTags {
+  id Int @id @unique @default(autoincrement())
+
+  meetup   Meetups @relation(fields: [meetupId], references: [id])
+  meetupId Int
+
+  tag   Tags @relation(fields: [tagId], references: [id])
+  tagId Int
+}

@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { sendMessage } from '../../common/utils/send-message.util';
+import { CreateMeetupDto, UpdateMeetupDto } from './dto';
+import { FrontendMeetup } from './types/frontend-meetup.typs';
 
 @Injectable()
 export class MeetupService {
@@ -9,11 +11,44 @@ export class MeetupService {
     private readonly client: ClientProxy,
   ) {}
 
-  public async getHello(): Promise<string> {
-    return await sendMessage({
+  async create(createMeetupDto: CreateMeetupDto): Promise<FrontendMeetup> {
+    const createdMeetup = await sendMessage<FrontendMeetup>({
       client: this.client,
-      metadata: 'getHello',
-      data: 'Anna',
+      metadata: 'MEETUP_CREATE',
+      data: { createMeetupDto },
+    });
+
+    return createdMeetup;
+  }
+
+  async readById(id: string): Promise<FrontendMeetup> {
+    const meetup: FrontendMeetup = await sendMessage({
+      client: this.client,
+      metadata: 'MEETUP_GET_BY_ID',
+      data: { id },
+    });
+
+    return meetup;
+  }
+
+  async update(
+    id: number,
+    updateMeetupDto: UpdateMeetupDto,
+  ): Promise<FrontendMeetup> {
+    const updatedMeetup = await sendMessage<FrontendMeetup>({
+      client: this.client,
+      metadata: 'MEETUP_UPDATE',
+      data: { id, updateMeetupDto },
+    });
+
+    return updatedMeetup;
+  }
+
+  async delete(id: number): Promise<void> {
+    await sendMessage({
+      client: this.client,
+      metadata: 'MEETUP_DELETE',
+      data: { id },
     });
   }
 }
