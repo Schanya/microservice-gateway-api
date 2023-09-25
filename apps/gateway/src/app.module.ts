@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { envValidationSchema } from './common/schemas/env-validation.schema';
 import { AllExceptionsFilter } from '@app/common';
 import { APP_FILTER } from '@nestjs/core';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { APP_FILTER } from '@nestjs/core';
       envFilePath: './apps/gateway/.env',
     }),
     MeetupModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [
