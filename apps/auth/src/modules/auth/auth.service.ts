@@ -4,8 +4,10 @@ import { FrontendJwt } from './types/jwt-frontend';
 import { PrismaService } from '@app/common';
 import { UserService } from '../user/user.service';
 import { JwtPayloadDto } from './dto/jwt-payload.dto';
-import { hash } from 'bcryptjs';
+import { compareSync, hash } from 'bcryptjs';
 import { JwtService } from '../jwt/jwt.service';
+import { RpcException } from '@nestjs/microservices';
+import { ValidateUserDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -47,5 +49,22 @@ export class AuthService {
     const refreshToken = await this.jwtService.generateRefreshJwt(payload);
 
     return { accessToken, refreshToken };
+  }
+
+  async validateUser(validateUserDto: ValidateUserDto): Promise<JwtPayloadDto> {
+    const candidate = await this.userService.readBy({
+      email: validateUserDto.email,
+    });
+
+    if (
+      candidate &&
+      compareSync(validateUserDto.password, candidate.password)
+    ) {
+      const { id, role } = candidate;
+
+      return { id, role };
+    }
+
+    throw new RpcException('Uncorrect email or password');
   }
 }

@@ -1,6 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { sendMessage } from '../../common/utils/send-message.util';
+import { CreateUserDto, JwtPayloadDto, User } from './dto';
+import { FrontendJwt } from './types';
 
 @Injectable()
 export class AuthService {
@@ -9,13 +11,32 @@ export class AuthService {
     private readonly client: ClientProxy,
   ) {}
 
-  async test(name: string): Promise<string> {
-    const greetings: string = await sendMessage({
+  async register(createUserDto: CreateUserDto): Promise<FrontendJwt> {
+    const user = await sendMessage<FrontendJwt>({
       client: this.client,
-      metadata: 'AUTH_TEST',
-      data: { name },
+      metadata: 'AUTH_REGISTRATION',
+      data: { createUserDto },
     });
 
-    return greetings;
+    return user;
+  }
+
+  async login(user: User): Promise<FrontendJwt> {
+    const tokens = await sendMessage<FrontendJwt>({
+      client: this.client,
+      metadata: 'AUTH_LOCAL_LOGIN',
+      data: { user },
+    });
+    return tokens;
+  }
+
+  async validateUser(email: string, password: string): Promise<JwtPayloadDto> {
+    const validate = await sendMessage<JwtPayloadDto>({
+      client: this.client,
+      metadata: 'AUTH_USER_VALIDATE',
+      data: { email, password },
+    });
+
+    return validate;
   }
 }

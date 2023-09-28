@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateMeetupSchema, UpdateMeetupSchema } from './schemas';
 import { JoiValidationPipe } from '../../common/pipes/joi-validation.pipe';
@@ -15,7 +16,9 @@ import { CreateMeetupDto, UpdateMeetupDto } from './dto';
 import { FrontendMeetup } from './types/frontend-meetup.typs';
 
 import { MeetupService } from './meetup.service';
+import { JwtAuthGuard, RolesGuard } from '../../common/guards';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
 export class MeetupController {
   constructor(private readonly meetupService: MeetupService) {}

@@ -24,4 +24,13 @@ export class AuthController {
     const tokens = await this.authService.localLogin(user);
     return new FrontendJwt(tokens.accessToken, tokens.refreshToken);
   }
+
+  @MessagePattern('AUTH_USER_VALIDATE')
+  public async validateUser(
+    @Payload('email') email: string,
+    @Payload('password') password: string,
+  ): Promise<JwtPayloadDto> {
+    const validate = await this.authService.validateUser({ email, password });
+    return validate;
+  }
 }
