@@ -6,5 +6,6 @@ export class Meetup {
   description: string;
   date: string;
   place: string;
+  organizerId: number;
   tags?: { tag: Tag }[];
 }

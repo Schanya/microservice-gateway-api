@@ -38,15 +38,9 @@ export class AuthController {
   public async localLogin(
     @UserParam() user: User,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<FrontendJwt> {
+  ): Promise<void> {
     const secretData = await this.authService.login(user);
 
-    this.setAuthCookie(res, secretData);
-
-    return secretData;
-  }
-
-  private setAuthCookie(res: Response, cookie: any): void {
-    res.cookie('auth-cookie', cookie, { httpOnly: true, sameSite: true });
+    res.cookie('auth-cookie', secretData, { httpOnly: true, sameSite: true });
   }
 }

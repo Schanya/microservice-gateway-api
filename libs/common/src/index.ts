@@ -8,3 +8,5 @@ export * from './filters/all-exceptions.filter';
 export * from './filters/microservice-all-exception.filter';
 
 export * from './constants/roles.enum';
+
+export * from './dto/jwt-payload.dto';

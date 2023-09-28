@@ -14,6 +14,7 @@ export class AuthController {
     @Payload('createUserDto') createUserDto: CreateUserDto,
   ): Promise<FrontendJwt> {
     const tokens = await this.authService.registration(createUserDto);
+
     return new FrontendJwt(tokens.accessToken, tokens.refreshToken);
   }
 
@@ -22,6 +23,7 @@ export class AuthController {
     @Payload('user') user: JwtPayloadDto,
   ): Promise<FrontendJwt> {
     const tokens = await this.authService.localLogin(user);
+
     return new FrontendJwt(tokens.accessToken, tokens.refreshToken);
   }
 
@@ -31,6 +33,7 @@ export class AuthController {
     @Payload('password') password: string,
   ): Promise<JwtPayloadDto> {
     const validate = await this.authService.validateUser({ email, password });
+
     return validate;
   }
 }

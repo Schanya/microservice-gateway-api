@@ -1,7 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
+import { JwtPayloadDto } from '@app/common';
+
 import { sendMessage } from '../../common/utils/send-message.util';
-import { CreateUserDto, JwtPayloadDto, User } from './dto';
+import { CreateUserDto, User } from './dto';
 import { FrontendJwt } from './types';
 
 @Injectable()
@@ -27,6 +29,7 @@ export class AuthService {
       metadata: 'AUTH_LOCAL_LOGIN',
       data: { user },
     });
+
     return tokens;
   }
 

@@ -1,5 +1,6 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
+import { JwtPayloadDto } from '@app/common';
 
 import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
 import { MeetupRepository } from './meetup.repository';
@@ -8,8 +9,14 @@ import { MeetupRepository } from './meetup.repository';
 export class MeetupService {
   constructor(private readonly meetupRepository: MeetupRepository) {}
 
-  async create(createMeeetupDto: CreateMeetupDto): Promise<Meetup> {
-    const createdMeetup = await this.meetupRepository.create(createMeeetupDto);
+  async create(
+    createMeeetupDto: CreateMeetupDto,
+    organizer: JwtPayloadDto,
+  ): Promise<Meetup> {
+    const createdMeetup = await this.meetupRepository.create(
+      createMeeetupDto,
+      organizer.id,
+    );
 
     return createdMeetup;
   }

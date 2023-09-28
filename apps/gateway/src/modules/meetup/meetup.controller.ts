@@ -10,13 +10,15 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { CreateMeetupSchema, UpdateMeetupSchema } from './schemas';
 import { JoiValidationPipe } from '../../common/pipes/joi-validation.pipe';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
+import { CreateMeetupSchema, UpdateMeetupSchema } from './schemas';
 import { FrontendMeetup } from './types/frontend-meetup.typs';
 
-import { MeetupService } from './meetup.service';
+import { JwtPayloadDto } from '@app/common';
+import { UserParam } from '../../common/decorators';
 import { JwtAuthGuard, RolesGuard } from '../../common/guards';
+import { MeetupService } from './meetup.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
@@ -28,8 +30,12 @@ export class MeetupController {
   async create(
     @Body(new JoiValidationPipe(CreateMeetupSchema))
     createMeetupDto: CreateMeetupDto,
+    @UserParam() organizer: JwtPayloadDto,
   ): Promise<FrontendMeetup> {
-    const createdMeetup = await this.meetupService.create(createMeetupDto);
+    const createdMeetup = await this.meetupService.create(
+      createMeetupDto,
+      organizer,
+    );
 
     return createdMeetup;
   }
