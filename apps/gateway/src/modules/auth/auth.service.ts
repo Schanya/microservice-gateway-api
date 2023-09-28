@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { JwtPayloadDto } from '@app/common';
+import { sendMessage } from '@gateway/common/utils';
 
-import { sendMessage } from '../../common/utils/send-message.util';
 import { CreateUserDto, User } from './dto';
 import { FrontendJwt } from './types';
 

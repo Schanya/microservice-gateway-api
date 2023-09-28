@@ -1,9 +1,10 @@
 import { Controller } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
+import { JwtPayloadDto } from '@app/common';
+
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto';
 import { FrontendJwt } from './types/jwt-frontend';
-import { JwtPayloadDto } from './dto/jwt-payload.dto';
 
 @Controller()
 export class AuthController {

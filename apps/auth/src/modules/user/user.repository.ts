@@ -1,7 +1,6 @@
 import { PrismaService } from '@app/common';
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto, User } from './dto';
-import { FindUserDto } from './dto/find-user.dto';
+import { CreateUserDto, FindUserDto, User } from './dto';
 
 @Injectable()
 export class UserRepository {
@@ -15,7 +14,7 @@ export class UserRepository {
     return createdUser;
   }
 
-  async readBy(options: FindUserDto): Promise<User> {
+  async readByUniqueField(options: FindUserDto): Promise<User> {
     const user = await this.prisma.users.findMany({
       where: { ...options },
     });

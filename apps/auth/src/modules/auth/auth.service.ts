@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
+import { JwtPayloadDto, PrismaService } from '@app/common';
+import { RpcException } from '@nestjs/microservices';
+import { compareSync, hash } from 'bcryptjs';
+
 import { CreateUserDto, User } from '../user/dto';
 import { FrontendJwt } from './types/jwt-frontend';
-import { PrismaService } from '@app/common';
-import { UserService } from '../user/user.service';
-import { JwtPayloadDto } from './dto/jwt-payload.dto';
-import { compareSync, hash } from 'bcryptjs';
-import { JwtService } from '../jwt/jwt.service';
-import { RpcException } from '@nestjs/microservices';
+
 import { ValidateUserDto } from './dto';
+
+import { UserService } from '../user/user.service';
+import { JwtService } from '../jwt/jwt.service';
 
 @Injectable()
 export class AuthService {
@@ -52,7 +54,7 @@ export class AuthService {
   }
 
   async validateUser(validateUserDto: ValidateUserDto): Promise<JwtPayloadDto> {
-    const candidate = await this.userService.readBy({
+    const candidate = await this.userService.readByUniqueField({
       email: validateUserDto.email,
     });
 

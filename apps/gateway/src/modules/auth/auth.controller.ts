@@ -8,13 +8,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { JoiValidationPipe } from '../../common/pipes/joi-validation.pipe';
+
 import { AuthService } from './auth.service';
 import { CreateUserDto, User } from './dto';
-import { CreateUserSchema } from './schemas/create-user.schema';
-import { LocalAuthGuard } from '../../common/guards';
-import { UserParam } from '../../common/decorators';
-import { FrontendJwt } from './types';
+import { CreateUserSchema } from './schemas';
+
+import { UserParam } from '@gateway/common/decorators';
+import { JoiValidationPipe } from '@gateway/common/pipes';
+import { LocalAuthGuard } from '@gateway/common/guards';
 
 @Controller('auth')
 export class AuthController {

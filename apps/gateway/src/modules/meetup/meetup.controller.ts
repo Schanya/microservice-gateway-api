@@ -43,8 +43,9 @@ export class MeetupController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async readById(@Param('id') id: string): Promise<FrontendMeetup> {
-    const tag = await this.meetupService.readById(id);
-    return tag;
+    const meetup = await this.meetupService.readById(id);
+
+    return meetup;
   }
 
   @Put(':id')

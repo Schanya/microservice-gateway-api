@@ -1,7 +1,8 @@
 import { Controller } from '@nestjs/common';
-import { UserService } from './user.service';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { FrontendUser } from './types/frontend-user';
+
+import { UserService } from './user.service';
+import { FrontendUser } from './types';
 
 @Controller()
 export class UserController {
@@ -9,7 +10,7 @@ export class UserController {
 
   @MessagePattern('USER_GET_BY')
   async readBy(@Payload('id') id: number): Promise<FrontendUser> {
-    const user = await this.userService.readBy({ id });
+    const user = await this.userService.readByUniqueField({ id });
     return new FrontendUser(user);
   }
 
