@@ -1,0 +1,32 @@
+import {
+  ContainsMeetupDto,
+  ContainsTagsInMeetupDto,
+  FilterMeetupDto,
+  ReadAllMeetupDto,
+} from '../dto';
+
+export class MeetupFiltration {
+  static whereFilter = (filterOptions: ReadAllMeetupDto): FilterMeetupDto => {
+    const meetupFilters: ContainsMeetupDto = {};
+    const tagFilters: ContainsTagsInMeetupDto = {};
+
+    for (let [key, value] of Object.entries(filterOptions)) {
+      if (key == 'tags') {
+        const tagsOptions = value.map((el: string) => {
+          return { tag: { title: { contains: el } } };
+        });
+
+        tagFilters[key] = { some: { OR: tagsOptions } };
+
+        continue;
+      }
+
+      meetupFilters[key] = { contains: value };
+    }
+
+    return {
+      containsMeetupFilter: meetupFilters,
+      containsTagFilter: tagFilters,
+    };
+  };
+}
