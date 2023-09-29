@@ -3,6 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { sendMessage } from '../../common/utils/send-message.util';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
 import { FrontendMeetup } from './types/frontend-meetup.typs';
+import { JwtPayloadDto } from '@app/common';
 
 @Injectable()
 export class MeetupService {
@@ -11,11 +12,14 @@ export class MeetupService {
     private readonly client: ClientProxy,
   ) {}
 
-  async create(createMeetupDto: CreateMeetupDto): Promise<FrontendMeetup> {
+  async create(
+    createMeetupDto: CreateMeetupDto,
+    organizer: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
     const createdMeetup = await sendMessage<FrontendMeetup>({
       client: this.client,
       metadata: 'MEETUP_CREATE',
-      data: { createMeetupDto },
+      data: { createMeetupDto, organizer },
     });
 
     return createdMeetup;

@@ -8,14 +8,19 @@ import {
   Param,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
-import { CreateMeetupSchema, UpdateMeetupSchema } from './schemas';
 import { JoiValidationPipe } from '../../common/pipes/joi-validation.pipe';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
+import { CreateMeetupSchema, UpdateMeetupSchema } from './schemas';
 import { FrontendMeetup } from './types/frontend-meetup.typs';
 
+import { JwtPayloadDto } from '@app/common';
+import { UserParam } from '../../common/decorators';
+import { JwtAuthGuard, RolesGuard } from '../../common/guards';
 import { MeetupService } from './meetup.service';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
 export class MeetupController {
   constructor(private readonly meetupService: MeetupService) {}
@@ -25,8 +30,12 @@ export class MeetupController {
   async create(
     @Body(new JoiValidationPipe(CreateMeetupSchema))
     createMeetupDto: CreateMeetupDto,
+    @UserParam() organizer: JwtPayloadDto,
   ): Promise<FrontendMeetup> {
-    const createdMeetup = await this.meetupService.create(createMeetupDto);
+    const createdMeetup = await this.meetupService.create(
+      createMeetupDto,
+      organizer,
+    );
 
     return createdMeetup;
   }
@@ -34,8 +43,9 @@ export class MeetupController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   async readById(@Param('id') id: string): Promise<FrontendMeetup> {
-    const tag = await this.meetupService.readById(id);
-    return tag;
+    const meetup = await this.meetupService.readById(id);
+
+    return meetup;
   }
 
   @Put(':id')

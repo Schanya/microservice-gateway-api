@@ -1,4 +1,4 @@
-import { PrismaService } from '@app/common';
+import { JwtPayloadDto, PrismaService } from '@app/common';
 import { Injectable } from '@nestjs/common';
 
 import { Tag } from '../tag/dto';
@@ -12,7 +12,10 @@ export class MeetupRepository {
     private readonly tagRepository: TagRepository,
   ) {}
 
-  async create(createMeetupDto: CreateMeetupDto): Promise<Meetup> {
+  async create(
+    createMeetupDto: CreateMeetupDto,
+    organizerId: number,
+  ): Promise<Meetup> {
     const { tags, ...meetupOptions } = createMeetupDto;
 
     const tagsEntity = await this._getAndCreateTags(tags);
@@ -20,6 +23,7 @@ export class MeetupRepository {
     const createdMeetup = await this.prisma.meetups.create({
       data: {
         ...meetupOptions,
+        organizerId: organizerId,
         tags: {
           create: tagsEntity.map((tag) => ({ tag: { connect: { ...tag } } })),
         },
