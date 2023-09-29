@@ -1,9 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { sendMessage } from '../../common/utils/send-message.util';
-import { CreateMeetupDto, UpdateMeetupDto } from './dto';
-import { FrontendMeetup } from './types/frontend-meetup.typs';
 import { JwtPayloadDto } from '@app/common';
+import { sendMessage } from '@gateway/common/utils';
+
+import { CreateMeetupDto, UpdateMeetupDto } from './dto';
+import { FrontendMeetup, IReadAllMeetupOptions } from './types';
 
 @Injectable()
 export class MeetupService {
@@ -33,6 +34,16 @@ export class MeetupService {
     });
 
     return meetup;
+  }
+
+  async readAll(options: IReadAllMeetupOptions): Promise<FrontendMeetup[]> {
+    const meetups: FrontendMeetup[] = await sendMessage({
+      client: this.client,
+      metadata: 'MEETUP_GET_ALL',
+      data: { options },
+    });
+
+    return meetups;
   }
 
   async update(
