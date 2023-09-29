@@ -9,12 +9,17 @@ export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    if (this._doesUserExist({ email: createUserDto.email })) {
+    const existedUser = await this.readByUniqueField({
+      email: createUserDto.email,
+    });
+
+    if (existedUser) {
       throw new RpcException({
         message: `The specified user already exists`,
         statusCode: HttpStatus.BAD_REQUEST,
       });
     }
+
     const createdUser = await this.userRepository.create(createUserDto);
 
     return createdUser;
@@ -27,12 +32,12 @@ export class UserService {
   }
 
   async delete(id: number): Promise<void> {
-    this._doesUserExist({ id });
+    await this._doesUserExist({ id });
 
     await this.userRepository.delete(id);
   }
 
-  private async _doesUserExist(options: FindUserDto): Promise<boolean> {
+  private async _doesUserExist(options: FindUserDto): Promise<void> {
     const existingUser = await this.userRepository.readByUniqueField(options);
     if (!existingUser) {
       throw new RpcException({
@@ -40,7 +45,5 @@ export class UserService {
         statusCode: HttpStatus.BAD_REQUEST,
       });
     }
-
-    return true;
   }
 }

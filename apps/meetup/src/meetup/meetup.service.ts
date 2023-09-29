@@ -27,7 +27,7 @@ export class MeetupService {
   }
 
   async update(id: number, updateMeetupDto: UpdateMeetupDto): Promise<Meetup> {
-    this._doesExistMeetup(id);
+    await this._doesExistMeetup(id);
 
     const updatedMeetup = await this.meetupRepository.update(
       id,
@@ -38,7 +38,7 @@ export class MeetupService {
   }
 
   async delete(id: number): Promise<void> {
-    this._doesExistMeetup(id);
+    await this._doesExistMeetup(id);
 
     await this.meetupRepository.delete(id);
   }

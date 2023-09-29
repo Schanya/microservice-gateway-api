@@ -8,10 +8,7 @@ import { FrontendJwt } from './types';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @Inject('AUTH')
-    private readonly client: ClientProxy,
-  ) {}
+  constructor(@Inject('AUTH') private readonly client: ClientProxy) {}
 
   async register(createUserDto: CreateUserDto): Promise<FrontendJwt> {
     const user = await sendMessage<FrontendJwt>({
