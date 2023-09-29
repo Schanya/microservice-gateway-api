@@ -4,7 +4,7 @@ config();
 import { RmqService } from '@app/common';
 import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { MicroserviceModule } from './microservice.module';
+import { MicroserviceModule } from './meetup-microservice.module';
 
 const logger = new Logger('Meetup');
 

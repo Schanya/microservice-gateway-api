@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { envSchemaOptions } from '../common/configs/env-schema.config';
 import { MeetupModule } from './meetup/meetup.module';
-import { MicroserviceAllExceptionsFilter } from '@app/common/filters/microservice-all-exception.filter';
+import { MicroserviceAllExceptionsFilter } from '@app/common';
 import { APP_FILTER } from '@nestjs/core';
 
 @Module({
