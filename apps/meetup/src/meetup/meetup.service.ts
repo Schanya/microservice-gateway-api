@@ -1,4 +1,4 @@
-import { JwtPayloadDto } from '@app/common';
+import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 
@@ -29,7 +29,9 @@ export class MeetupService {
     return meetup;
   }
 
-  async readAll(options: IReadAllMeetupOptions): Promise<Meetup[]> {
+  async readAll(
+    options: IReadAllMeetupOptions,
+  ): Promise<ReadAllResult<Meetup>> {
     const meetups = await this.meetupRepository.readAll(options);
 
     return meetups;

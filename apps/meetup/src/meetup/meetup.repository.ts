@@ -1,4 +1,9 @@
-import { PrismaService } from '@app/common';
+import {
+  PrismaService,
+  ReadAllResult,
+  defaultPagination,
+  defaultSorting,
+} from '@app/common';
 import { Injectable } from '@nestjs/common';
 
 import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
@@ -54,14 +59,22 @@ export class MeetupRepository {
     return meetup;
   }
 
-  async readAll(options: IReadAllMeetupOptions): Promise<Meetup[]> {
+  async readAll(
+    options: IReadAllMeetupOptions,
+  ): Promise<ReadAllResult<Meetup>> {
     const { sorting, pagination, filters } = options;
+
+    const { column, direction } = sorting ?? defaultSorting;
+    const { offset, size } = pagination ?? defaultPagination;
 
     const { containsMeetupFilter, containsTagFilter } =
       MeetupFiltration.whereFilter(filters);
 
     const meetups = await this.prisma.meetups.findMany({
       where: { ...containsMeetupFilter, ...containsTagFilter },
+      orderBy: { [column]: direction },
+      skip: offset,
+      take: Number(size),
       include: {
         tags: {
           select: {
@@ -71,7 +84,7 @@ export class MeetupRepository {
       },
     });
 
-    return meetups;
+    return { totalRecordsNumber: meetups.length, records: meetups };
   }
 
   async update(id: number, updateMeetupDto: UpdateMeetupDto): Promise<Meetup> {
