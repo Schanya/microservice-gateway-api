@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtPayloadDto, PrismaService } from '@app/common';
 import { RpcException } from '@nestjs/microservices';
 import { compareSync, hash } from 'bcryptjs';
@@ -57,6 +57,39 @@ export class AuthService {
 
   async logout(jwtPayload: JwtPayloadDto, refreshToken: string): Promise<void> {
     await this.jwtService.deleteJwt(jwtPayload.id, refreshToken);
+  }
+
+  async refresh(
+    jwtPayload: JwtPayloadDto,
+    refreshToken: string,
+  ): Promise<FrontendJwt> {
+    const { id, role } = jwtPayload;
+    const token = await this.jwtService.getJwt(id, refreshToken);
+
+    if (!token) {
+      await this.jwtService.deleteAllJwt(id);
+
+      throw new RpcException({
+        message: 'Unauthorized user',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    }
+
+    const isValidToken = await this.jwtService.isValidRefreshJwt(token);
+
+    if (!isValidToken) {
+      await this.jwtService.deleteJwt(id, refreshToken);
+      throw new RpcException({
+        message: 'Unauthorized user',
+        statusCode: HttpStatus.UNAUTHORIZED,
+      });
+    }
+
+    await this.jwtService.deleteJwt(id, refreshToken);
+
+    const tokens = await this.loginUser(id, role);
+
+    return tokens;
   }
 
   async validateUser(validateUserDto: ValidateUserDto): Promise<JwtPayloadDto> {

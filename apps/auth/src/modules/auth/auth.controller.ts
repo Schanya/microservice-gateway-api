@@ -36,6 +36,19 @@ export class AuthController {
     await this.authService.logout(jwtPayload, refreshToken);
   }
 
+  @MessagePattern('AUTH_REFRESH')
+  public async refresh(
+    @Payload('jwtPayload') jwtPayload: JwtPayloadDto,
+    @Payload('refreshToken') oldRefreshToken: string,
+  ): Promise<FrontendJwt> {
+    const { accessToken, refreshToken } = await this.authService.refresh(
+      jwtPayload,
+      oldRefreshToken,
+    );
+
+    return new FrontendJwt(accessToken, refreshToken);
+  }
+
   @MessagePattern('AUTH_USER_VALIDATE')
   public async validateUser(
     @Payload('email') email: string,

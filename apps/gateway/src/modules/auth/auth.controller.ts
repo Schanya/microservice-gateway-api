@@ -15,7 +15,11 @@ import { CreateUserSchema } from './schemas';
 
 import { GetTokens, UserParam } from '@gateway/common/decorators';
 import { JoiValidationPipe } from '@gateway/common/pipes';
-import { JwtAuthGuard, LocalAuthGuard } from '@gateway/common/guards';
+import {
+  JwtAuthGuard,
+  LocalAuthGuard,
+  RefreshGuard,
+} from '@gateway/common/guards';
 import { JwtPayloadDto } from '@app/common';
 
 @Controller('auth')
@@ -57,5 +61,18 @@ export class AuthController {
     await this.authService.logout(userPayload, token);
 
     res.cookie('auth-cookie', null, { httpOnly: true, sameSite: true });
+  }
+
+  @UseGuards(RefreshGuard)
+  @Post('refresh')
+  @HttpCode(HttpStatus.OK)
+  public async refresh(
+    @UserParam() userPayload: JwtPayloadDto,
+    @GetTokens('refreshToken') token: string,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<void> {
+    const tokens = await this.authService.refresh(userPayload, token);
+
+    res.cookie('auth-cookie', tokens, { httpOnly: true, sameSite: true });
   }
 }

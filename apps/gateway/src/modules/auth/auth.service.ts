@@ -41,6 +41,22 @@ export class AuthService {
     });
   }
 
+  async refresh(
+    jwtPayload: JwtPayloadDto,
+    refreshToken: string,
+  ): Promise<FrontendJwt> {
+    const tokens = await sendMessage<FrontendJwt>({
+      client: this.client,
+      metadata: 'AUTH_REFRESH',
+      data: {
+        jwtPayload,
+        refreshToken,
+      },
+    });
+
+    return tokens;
+  }
+
   async validateUser(email: string, password: string): Promise<JwtPayloadDto> {
     const validate = await sendMessage<JwtPayloadDto>({
       client: this.client,

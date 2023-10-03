@@ -39,4 +39,10 @@ export class JwtRepository {
       },
     });
   }
+
+  async deleteAllJwt(userId: number): Promise<void> {
+    await this.prisma.tokens.deleteMany({
+      where: { userId },
+    });
+  }
 }
