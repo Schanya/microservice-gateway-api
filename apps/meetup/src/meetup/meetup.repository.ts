@@ -1,9 +1,17 @@
-import { JwtPayloadDto, PrismaService } from '@app/common';
+import {
+  PrismaService,
+  ReadAllResult,
+  defaultPagination,
+  defaultSorting,
+} from '@app/common';
 import { Injectable } from '@nestjs/common';
+
+import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
+import { MeetupFiltration } from './filters';
+import { IReadAllMeetupOptions } from './types';
 
 import { Tag } from '../tag/dto';
 import { TagRepository } from '../tag/tag.repository';
-import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
 
 @Injectable()
 export class MeetupRepository {
@@ -49,6 +57,34 @@ export class MeetupRepository {
     });
 
     return meetup;
+  }
+
+  async readAll(
+    options: IReadAllMeetupOptions,
+  ): Promise<ReadAllResult<Meetup>> {
+    const { sorting, pagination, filters } = options;
+
+    const { column, direction } = sorting ?? defaultSorting;
+    const { offset, size } = pagination ?? defaultPagination;
+
+    const { containsMeetupFilter, containsTagFilter } =
+      MeetupFiltration.whereFilter(filters);
+
+    const meetups = await this.prisma.meetups.findMany({
+      where: { ...containsMeetupFilter, ...containsTagFilter },
+      orderBy: { [column]: direction },
+      skip: offset,
+      take: Number(size),
+      include: {
+        tags: {
+          select: {
+            tag: true,
+          },
+        },
+      },
+    });
+
+    return { totalRecordsNumber: meetups.length, records: meetups };
   }
 
   async update(id: number, updateMeetupDto: UpdateMeetupDto): Promise<Meetup> {

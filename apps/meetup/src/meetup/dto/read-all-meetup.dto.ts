@@ -1,4 +1,4 @@
-export class UpdateMeetupDto {
+export class ReadAllMeetupDto {
   title?: string;
   description?: string;
   date?: string;
