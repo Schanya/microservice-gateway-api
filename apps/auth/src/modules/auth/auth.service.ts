@@ -92,6 +92,35 @@ export class AuthService {
     return tokens;
   }
 
+  async googleLogin(googleUser: any) {
+    const { email } = googleUser;
+
+    let user = await this.userService.readByUniqueField({ email });
+
+    if (!user) {
+      user = await this.createGoogleUser(googleUser);
+    }
+
+    const { id, role } = user;
+    const tokens = await this.loginUser(id, role);
+
+    return tokens;
+  }
+
+  private async createGoogleUser(googleUser: any): Promise<User> {
+    const { firstName, email } = googleUser;
+
+    const user: CreateUserDto = {
+      login: firstName,
+      email,
+      password: null,
+      provider: 'GOOGLE',
+    };
+
+    const registratedUser = await this.userService.create(user);
+    return registratedUser;
+  }
+
   async validateUser(validateUserDto: ValidateUserDto): Promise<JwtPayloadDto> {
     const candidate = await this.userService.readByUniqueField({
       email: validateUserDto.email,

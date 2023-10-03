@@ -57,6 +57,18 @@ export class AuthService {
     return tokens;
   }
 
+  async googleLogin(googleUser: any): Promise<FrontendJwt> {
+    const tokens = await sendMessage<FrontendJwt>({
+      client: this.client,
+      metadata: 'AUTH_GOOGLE_LOGIN',
+      data: {
+        googleUser,
+      },
+    });
+
+    return tokens;
+  }
+
   async validateUser(email: string, password: string): Promise<JwtPayloadDto> {
     const validate = await sendMessage<JwtPayloadDto>({
       client: this.client,

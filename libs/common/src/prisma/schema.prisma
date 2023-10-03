@@ -17,12 +17,17 @@ enum Roles {
   ADMIN
 }
 
-model Users {
-  id       Int     @id @unique @default(autoincrement())
-  login    String
-  email    String  @unique
-  password String?
+enum Provider {
+  LOCAL
+  GOOGLE
+}
 
+model Users {
+  id             Int              @id @unique @default(autoincrement())
+  login          String
+  email          String           @unique
+  password       String?
+  provider       Provider
   role           Roles            @default(USER)
   tokens         Tokens[]
   MeetupsToUsers MeetupsToUsers[]

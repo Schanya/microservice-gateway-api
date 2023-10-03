@@ -49,6 +49,14 @@ export class AuthController {
     return new FrontendJwt(accessToken, refreshToken);
   }
 
+  @MessagePattern('AUTH_GOOGLE_LOGIN')
+  async yandexLogin(@Payload('googleUser') googleUser: any) {
+    const { accessToken, refreshToken } =
+      await this.authService.googleLogin(googleUser);
+
+    return new FrontendJwt(accessToken, refreshToken);
+  }
+
   @MessagePattern('AUTH_USER_VALIDATE')
   public async validateUser(
     @Payload('email') email: string,
