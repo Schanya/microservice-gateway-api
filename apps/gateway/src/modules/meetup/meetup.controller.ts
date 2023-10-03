@@ -19,13 +19,19 @@ import { JoiValidationPipe } from '@gateway/common/pipes';
 
 import { MeetupService } from './meetup.service';
 
-import { CreateMeetupDto, ReadAllMeetupDto, UpdateMeetupDto } from './dto';
+import {
+  CreateMeetupDto,
+  ElasticsearchMeetupDto,
+  ReadAllMeetupDto,
+  UpdateMeetupDto,
+} from './dto';
 import {
   CreateMeetupSchema,
+  ElasticsearchMeetupSchema,
   ReadAllMeetupSchema,
   UpdateMeetupSchema,
 } from './schemas';
-import { FrontendMeetup } from './types';
+import { FrontendMeetup, MeetupSearchResult } from './types';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
@@ -70,6 +76,18 @@ export class MeetupController {
     });
 
     return meetups;
+  }
+
+  @Get('search')
+  @HttpCode(HttpStatus.OK)
+  async search(
+    @Query(new JoiValidationPipe(ElasticsearchMeetupSchema))
+    elasticsearchMeetup: ElasticsearchMeetupDto,
+  ): Promise<MeetupSearchResult> {
+    const { searchText } = elasticsearchMeetup;
+    const searchResult = await this.meetupService.elasticsearch(searchText);
+
+    return searchResult;
   }
 
   @Put(':id')

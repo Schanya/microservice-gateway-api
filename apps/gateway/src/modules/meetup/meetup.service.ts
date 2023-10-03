@@ -4,7 +4,11 @@ import { JwtPayloadDto } from '@app/common';
 import { sendMessage } from '@gateway/common/utils';
 
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
-import { FrontendMeetup, IReadAllMeetupOptions } from './types';
+import {
+  FrontendMeetup,
+  IReadAllMeetupOptions,
+  MeetupSearchResult,
+} from './types';
 
 @Injectable()
 export class MeetupService {
@@ -44,6 +48,16 @@ export class MeetupService {
     });
 
     return meetups;
+  }
+
+  async elasticsearch(searchText: string): Promise<MeetupSearchResult> {
+    const searchResult = await sendMessage<MeetupSearchResult>({
+      client: this.client,
+      metadata: 'MEETUP_ES',
+      data: { searchText },
+    });
+
+    return searchResult;
   }
 
   async update(

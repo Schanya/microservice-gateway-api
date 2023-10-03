@@ -6,10 +6,15 @@ import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
 import { IReadAllMeetupOptions } from './types';
 
 import { MeetupRepository } from './meetup.repository';
+import MeetupElasticsearchService from '../elasticsearch/meetup-elasticsearch.service';
+import { MeetupSearchResult } from '../elasticsearch/types';
 
 @Injectable()
 export class MeetupService {
-  constructor(private readonly meetupRepository: MeetupRepository) {}
+  constructor(
+    private readonly meetupRepository: MeetupRepository,
+    private readonly meetupElasticsearch: MeetupElasticsearchService,
+  ) {}
 
   async create(
     createMeeetupDto: CreateMeetupDto,
@@ -19,6 +24,8 @@ export class MeetupService {
       createMeeetupDto,
       organizer.id,
     );
+
+    await this.meetupElasticsearch.create(createdMeetup);
 
     return createdMeetup;
   }
@@ -37,6 +44,12 @@ export class MeetupService {
     return meetups;
   }
 
+  async search(searchText: string): Promise<MeetupSearchResult> {
+    const result = await this.meetupElasticsearch.search(searchText);
+
+    return result;
+  }
+
   async update(id: number, updateMeetupDto: UpdateMeetupDto): Promise<Meetup> {
     await this._doesExistMeetup(id);
 
@@ -45,11 +58,14 @@ export class MeetupService {
       updateMeetupDto,
     );
 
+    await this.meetupElasticsearch.update(updatedMeetup);
+
     return updatedMeetup;
   }
 
   async delete(id: number): Promise<void> {
     await this._doesExistMeetup(id);
+    await this.meetupElasticsearch.delete(id);
 
     await this.meetupRepository.delete(id);
   }

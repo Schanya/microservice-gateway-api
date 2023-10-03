@@ -8,9 +8,15 @@ import { MeetupController } from './meetup.controller';
 import { MeetupService } from './meetup.service';
 import { MeetupRepository } from './meetup.repository';
 import { TagModule } from '../tag/tag.module';
+import { SearchModule } from '../elasticsearch/elasticsearch.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(envSchemaOptions), DatabaseModule, TagModule],
+  imports: [
+    ConfigModule.forRoot(envSchemaOptions),
+    DatabaseModule,
+    TagModule,
+    SearchModule,
+  ],
   controllers: [MeetupController],
   providers: [MeetupRepository, MeetupService],
   exports: [MeetupService],
