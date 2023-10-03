@@ -50,7 +50,13 @@ export class AuthService {
     const accessToken = await this.jwtService.generateAccessJwt(payload);
     const refreshToken = await this.jwtService.generateRefreshJwt(payload);
 
+    await this.jwtService.saveJwt(id, refreshToken);
+
     return { accessToken, refreshToken };
+  }
+
+  async logout(jwtPayload: JwtPayloadDto, refreshToken: string): Promise<void> {
+    await this.jwtService.deleteJwt(jwtPayload.id, refreshToken);
   }
 
   async validateUser(validateUserDto: ValidateUserDto): Promise<JwtPayloadDto> {

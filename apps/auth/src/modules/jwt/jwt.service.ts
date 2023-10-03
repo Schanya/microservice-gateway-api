@@ -30,4 +30,20 @@ export class JwtService {
 
     return refreshToken;
   }
+
+  public async readJwt(
+    userId: number,
+    refreshToken: string,
+  ): Promise<string | undefined> {
+    const jwt = await this.jwtRepository.getJwt(userId, refreshToken);
+    return jwt;
+  }
+
+  public async saveJwt(userId: number, refreshToken: string): Promise<void> {
+    await this.jwtRepository.saveJwt(userId, refreshToken);
+  }
+
+  public async deleteJwt(userId: number, refreshToken: string): Promise<void> {
+    await this.jwtRepository.deleteJwt(userId, refreshToken);
+  }
 }

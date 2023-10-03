@@ -30,6 +30,17 @@ export class AuthService {
     return tokens;
   }
 
+  async logout(jwtPayload: JwtPayloadDto, refreshToken: string): Promise<void> {
+    await sendMessage({
+      client: this.client,
+      metadata: 'AUTH_LOGOUT',
+      data: {
+        jwtPayload,
+        refreshToken,
+      },
+    });
+  }
+
   async validateUser(email: string, password: string): Promise<JwtPayloadDto> {
     const validate = await sendMessage<JwtPayloadDto>({
       client: this.client,

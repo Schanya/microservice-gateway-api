@@ -28,6 +28,14 @@ export class AuthController {
     return new FrontendJwt(tokens.accessToken, tokens.refreshToken);
   }
 
+  @MessagePattern('AUTH_LOGOUT')
+  public async logout(
+    @Payload('jwtPayload') jwtPayload: JwtPayloadDto,
+    @Payload('refreshToken') refreshToken: string,
+  ): Promise<void> {
+    await this.authService.logout(jwtPayload, refreshToken);
+  }
+
   @MessagePattern('AUTH_USER_VALIDATE')
   public async validateUser(
     @Payload('email') email: string,

@@ -18,13 +18,23 @@ enum Roles {
 }
 
 model Users {
-  id             Int              @id @unique @default(autoincrement())
-  login          String
-  email          String           @unique
-  password       String?
+  id       Int     @id @unique @default(autoincrement())
+  login    String
+  email    String  @unique
+  password String?
+
   role           Roles            @default(USER)
+  tokens         Tokens[]
   MeetupsToUsers MeetupsToUsers[]
   Meetups        Meetups[]
+}
+
+model Tokens {
+  id           Int    @id @unique @default(autoincrement())
+  refreshToken String
+
+  user   Users @relation(fields: [userId], references: [id])
+  userId Int
 }
 
 model Meetups {
