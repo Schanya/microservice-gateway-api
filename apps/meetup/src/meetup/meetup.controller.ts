@@ -1,10 +1,10 @@
+import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { Controller, ParseIntPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
-import { JwtPayloadDto } from '@app/common';
 
+import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
 import { MeetupService } from './meetup.service';
-import { CreateMeetupDto, UpdateMeetupDto } from './dto';
-import { FrontendMeetup } from './types/fronted-meetup.type';
+import { FrontendMeetup, IReadAllMeetupOptions } from './types';
 
 @Controller()
 export class MeetupController {
@@ -30,6 +30,15 @@ export class MeetupController {
     const meetup = await this.meetupService.readById(id);
 
     return new FrontendMeetup(meetup);
+  }
+
+  @MessagePattern('MEETUP_GET_ALL')
+  async readAll(
+    @Payload('options') options: IReadAllMeetupOptions,
+  ): Promise<ReadAllResult<Meetup>> {
+    const meetups = await this.meetupService.readAll(options);
+
+    return meetups;
   }
 
   @MessagePattern('MEETUP_UPDATE')

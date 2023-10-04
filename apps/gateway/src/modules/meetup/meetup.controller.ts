@@ -8,17 +8,24 @@ import {
   Param,
   Post,
   Put,
+  Query,
   UseGuards,
 } from '@nestjs/common';
-import { JoiValidationPipe } from '../../common/pipes/joi-validation.pipe';
-import { CreateMeetupDto, UpdateMeetupDto } from './dto';
-import { CreateMeetupSchema, UpdateMeetupSchema } from './schemas';
-import { FrontendMeetup } from './types/frontend-meetup.typs';
 
 import { JwtPayloadDto } from '@app/common';
-import { UserParam } from '../../common/decorators';
-import { JwtAuthGuard, RolesGuard } from '../../common/guards';
+import { UserParam } from '@gateway/common/decorators';
+import { JwtAuthGuard, RolesGuard } from '@gateway/common/guards';
+import { JoiValidationPipe } from '@gateway/common/pipes';
+
 import { MeetupService } from './meetup.service';
+
+import { CreateMeetupDto, ReadAllMeetupDto, UpdateMeetupDto } from './dto';
+import {
+  CreateMeetupSchema,
+  ReadAllMeetupSchema,
+  UpdateMeetupSchema,
+} from './schemas';
+import { FrontendMeetup } from './types';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
@@ -46,6 +53,23 @@ export class MeetupController {
     const meetup = await this.meetupService.readById(id);
 
     return meetup;
+  }
+
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  async readAll(
+    @Query(new JoiValidationPipe(ReadAllMeetupSchema))
+    options: ReadAllMeetupDto,
+  ): Promise<FrontendMeetup[]> {
+    const { pagination, sorting, ...filters } = options;
+
+    const meetups = await this.meetupService.readAll({
+      pagination,
+      sorting,
+      filters,
+    });
+
+    return meetups;
   }
 
   @Put(':id')

@@ -30,4 +30,37 @@ export class JwtService {
 
     return refreshToken;
   }
+
+  public async isValidRefreshJwt(jwt: string): Promise<boolean> {
+    try {
+      await this.nestJwtService.verifyAsync(jwt, {
+        secret: this.configService.get('REFRESH_TOKEN_SECRET'),
+        maxAge: this.configService.get('REFRESH_TOKEN_EXPIRED'),
+      });
+    } catch {
+      return false;
+    }
+    return true;
+  }
+
+  public async getJwt(
+    userId: number,
+    refreshToken: string,
+  ): Promise<string | undefined> {
+    const jwt = await this.jwtRepository.getJwt(userId, refreshToken);
+
+    return jwt;
+  }
+
+  public async saveJwt(userId: number, refreshToken: string): Promise<void> {
+    await this.jwtRepository.saveJwt(userId, refreshToken);
+  }
+
+  public async deleteJwt(userId: number, refreshToken: string): Promise<void> {
+    await this.jwtRepository.deleteJwt(userId, refreshToken);
+  }
+
+  public async deleteAllJwt(userId: number): Promise<void> {
+    await this.jwtRepository.deleteAllJwt(userId);
+  }
 }
