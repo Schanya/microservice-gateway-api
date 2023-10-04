@@ -51,7 +51,7 @@ export class AuthController {
   }
 
   @MessagePattern('AUTH_GOOGLE_LOGIN')
-  async yandexLogin(@Payload('googleUser') googleUser: GoogleUserDto) {
+  async googleLogin(@Payload('googleUser') googleUser: GoogleUserDto) {
     const { accessToken, refreshToken } =
       await this.authService.googleLogin(googleUser);
 
