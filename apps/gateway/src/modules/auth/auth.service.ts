@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 import { JwtPayloadDto } from '@app/common';
 import { sendMessage } from '@gateway/common/utils';
 
-import { CreateUserDto, User } from './dto';
+import { CreateUserDto, GoogleUserDto, User } from './dto';
 import { FrontendJwt } from './types';
 
 @Injectable()
@@ -51,6 +51,18 @@ export class AuthService {
       data: {
         jwtPayload,
         refreshToken,
+      },
+    });
+
+    return tokens;
+  }
+
+  async googleLogin(googleUser: GoogleUserDto): Promise<FrontendJwt> {
+    const tokens = await sendMessage<FrontendJwt>({
+      client: this.client,
+      metadata: 'AUTH_GOOGLE_LOGIN',
+      data: {
+        googleUser,
       },
     });
 

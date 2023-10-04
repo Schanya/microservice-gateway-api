@@ -12,6 +12,7 @@ async function main() {
           '$2a$10$q59vIYxhdq27x0wabZArsed7uacTfeNDH0SFK8cdgtEDfhWMX.8Ha', //admin
         email: 'admin@gmail.com',
         role: 'ADMIN',
+        provider: 'LOCAL',
       },
       {
         login: 'testUser',
@@ -19,6 +20,7 @@ async function main() {
           '$2a$10$uL31jvE523rcb/mKFItzHek/AE6F9CSXJr5oUusgapMgIbo03VS32', //testUser
         email: 'testUser@gmail.com',
         role: 'USER',
+        provider: 'LOCAL',
       },
     ],
     skipDuplicates: true,
