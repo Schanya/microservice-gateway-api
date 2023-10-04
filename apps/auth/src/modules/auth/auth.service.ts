@@ -6,7 +6,7 @@ import { compareSync, hash } from 'bcryptjs';
 import { CreateUserDto, User } from '../user/dto';
 import { FrontendJwt } from './types/jwt-frontend';
 
-import { ValidateUserDto } from './dto';
+import { GoogleUserDto, ValidateUserDto } from './dto';
 
 import { UserService } from '../user/user.service';
 import { JwtService } from '../jwt/jwt.service';
@@ -92,7 +92,7 @@ export class AuthService {
     return tokens;
   }
 
-  async googleLogin(googleUser: any) {
+  async googleLogin(googleUser: GoogleUserDto) {
     const { email } = googleUser;
 
     let user = await this.userService.readByUniqueField({ email });
@@ -107,7 +107,7 @@ export class AuthService {
     return tokens;
   }
 
-  private async createGoogleUser(googleUser: any): Promise<User> {
+  private async createGoogleUser(googleUser: GoogleUserDto): Promise<User> {
     const { firstName, email } = googleUser;
 
     const user: CreateUserDto = {

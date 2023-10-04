@@ -5,6 +5,7 @@ import { JwtPayloadDto } from '@app/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto';
 import { FrontendJwt } from './types/jwt-frontend';
+import { GoogleUserDto } from './dto';
 
 @Controller()
 export class AuthController {
@@ -50,7 +51,7 @@ export class AuthController {
   }
 
   @MessagePattern('AUTH_GOOGLE_LOGIN')
-  async yandexLogin(@Payload('googleUser') googleUser: any) {
+  async yandexLogin(@Payload('googleUser') googleUser: GoogleUserDto) {
     const { accessToken, refreshToken } =
       await this.authService.googleLogin(googleUser);
 

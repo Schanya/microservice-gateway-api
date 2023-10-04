@@ -4,6 +4,7 @@ import { config } from 'dotenv';
 
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { GoogleUserDto } from '../dto';
 
 config();
 
@@ -26,7 +27,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<any> {
     const { name, emails, photos } = profile;
 
-    const user = {
+    const user: GoogleUserDto = {
       email: emails[0].value,
       firstName: name.givenName,
       lastName: name.familyName,

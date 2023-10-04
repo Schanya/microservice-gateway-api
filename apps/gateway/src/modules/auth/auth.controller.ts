@@ -11,8 +11,8 @@ import {
 import { Response } from 'express';
 
 import { AuthService } from './auth.service';
-import { CreateUserDto, User } from './dto';
-import { CreateUserSchema } from './schemas';
+import { CreateUserDto, GoogleUserDto, User } from './dto';
+import { CreateUserSchema, GoogleUserSchema } from './schemas';
 
 import { JwtPayloadDto } from '@app/common';
 import { GetTokens, UserParam } from '@gateway/common/decorators';
@@ -82,15 +82,13 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
-  async googleAuth(
-    @UserParam() googleUser: any,
-    @Res({ passthrough: true }) res: Response,
-  ) {}
+  async googleAuth() {}
 
   @Get('google/redirect')
   @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(
-    @UserParam() googleUser: any,
+    @UserParam(new JoiValidationPipe(GoogleUserSchema))
+    googleUser: GoogleUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const tokens = await this.authService.googleLogin(googleUser);
