@@ -18,8 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/gateway/test/jest-e2e.json",
-    "prisma:meetup:client": "npx prisma generate --schema ./apps/meetup/prisma/schema.prisma",
-    "prisma:meetup:migrate": "dotenv -e ./apps/meetup/.env -- npx prisma migrate dev --schema=./apps/meetup/prisma/schema.prisma"
+    "prisma:client": "npx prisma generate --schema ./libs/common/src/prisma/schema.prisma",
+    "prisma:migrate": "dotenv -e ./libs/common/.env -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.10.0",
@@ -38,6 +38,8 @@
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.3.1",
     "joi": "^17.10.0",
+    "passport": "^0.6.0",
+    "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
     "reflect-metadata": "^0.1.13",
@@ -52,6 +54,7 @@
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
+    "@types/passport-google-oauth20": "^2.0.12",
     "@types/passport-jwt": "^3.0.10",
     "@types/passport-local": "^1.0.36",
     "@types/supertest": "^2.0.12",
@@ -96,6 +99,6 @@
     }
   },
   "prisma": {
-    "seed": "dotenv -e ./apps/meetup/.env -- ts-node --esm ./apps/meetup/prisma/seeds/seed.ts"
+    "seed": "dotenv -e ./libs/common/.env -- ts-node --esm ./libs/common/src/prisma/seeds/seed.ts"
   }
 }

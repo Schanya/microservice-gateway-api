@@ -5,6 +5,7 @@ import { JwtPayloadDto } from '@app/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../user/dto';
 import { FrontendJwt } from './types/jwt-frontend';
+import { GoogleUserDto } from './dto';
 
 @Controller()
 export class AuthController {
@@ -26,6 +27,35 @@ export class AuthController {
     const tokens = await this.authService.localLogin(user);
 
     return new FrontendJwt(tokens.accessToken, tokens.refreshToken);
+  }
+
+  @MessagePattern('AUTH_LOGOUT')
+  public async logout(
+    @Payload('jwtPayload') jwtPayload: JwtPayloadDto,
+    @Payload('refreshToken') refreshToken: string,
+  ): Promise<void> {
+    await this.authService.logout(jwtPayload, refreshToken);
+  }
+
+  @MessagePattern('AUTH_REFRESH')
+  public async refresh(
+    @Payload('jwtPayload') jwtPayload: JwtPayloadDto,
+    @Payload('refreshToken') oldRefreshToken: string,
+  ): Promise<FrontendJwt> {
+    const { accessToken, refreshToken } = await this.authService.refresh(
+      jwtPayload,
+      oldRefreshToken,
+    );
+
+    return new FrontendJwt(accessToken, refreshToken);
+  }
+
+  @MessagePattern('AUTH_GOOGLE_LOGIN')
+  async googleLogin(@Payload('googleUser') googleUser: GoogleUserDto) {
+    const { accessToken, refreshToken } =
+      await this.authService.googleLogin(googleUser);
+
+    return new FrontendJwt(accessToken, refreshToken);
   }
 
   @MessagePattern('AUTH_USER_VALIDATE')
