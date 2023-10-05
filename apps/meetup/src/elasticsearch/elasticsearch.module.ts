@@ -1,9 +1,9 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
-import MeetupElasticsearchService from './meetup-elasticsearch.service';
+import { MeetupEsService } from './meetup-elasticsearch.service';
 
-const DefineElasticsearchModule = ElasticsearchModule.registerAsync({
+const DefineEsModule = ElasticsearchModule.registerAsync({
   imports: [ConfigModule],
   useFactory: async (configService: ConfigService) => ({
     node: configService.get('ELASTICSEARCH_NODE'),
@@ -16,15 +16,14 @@ const DefineElasticsearchModule = ElasticsearchModule.registerAsync({
 });
 
 @Module({
-  imports: [DefineElasticsearchModule],
-  providers: [MeetupElasticsearchService],
-  exports: [MeetupElasticsearchService],
+  imports: [DefineEsModule],
+  providers: [MeetupEsService],
+  exports: [MeetupEsService],
 })
-export class SearchModule implements OnModuleInit {
-  constructor(
-    private readonly meetupSearchService: MeetupElasticsearchService,
-  ) {}
-  public async onModuleInit() {
-    await this.meetupSearchService.createIndex();
+export class EsModule implements OnModuleInit {
+  constructor(private readonly meetupEsService: MeetupEsService) {}
+
+  async onModuleInit(): Promise<void> {
+    await this.meetupEsService.createIndex();
   }
 }

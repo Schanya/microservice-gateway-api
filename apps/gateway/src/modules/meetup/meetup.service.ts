@@ -50,7 +50,7 @@ export class MeetupService {
     return meetups;
   }
 
-  async elasticsearch(searchText: string): Promise<MeetupSearchResult> {
+  async esSearch(searchText: string): Promise<MeetupSearchResult> {
     const searchResult = await sendMessage<MeetupSearchResult>({
       client: this.client,
       metadata: 'MEETUP_ES',

@@ -1,24 +1,17 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 
 import { DatabaseModule } from '@app/common';
-import { envSchemaOptions } from 'apps/meetup/common/configs/env-schema.config';
+import { EsModule } from '../elasticsearch/elasticsearch.module';
+import { TagModule } from '../tag/tag.module';
 
 import { MeetupController } from './meetup.controller';
-import { MeetupService } from './meetup.service';
 import { MeetupRepository } from './meetup.repository';
-import { TagModule } from '../tag/tag.module';
-import { SearchModule } from '../elasticsearch/elasticsearch.module';
+import { MeetupService } from './meetup.service';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(envSchemaOptions),
-    DatabaseModule,
-    TagModule,
-    SearchModule,
-  ],
-  controllers: [MeetupController],
+  imports: [DatabaseModule, TagModule, EsModule],
   providers: [MeetupRepository, MeetupService],
+  controllers: [MeetupController],
   exports: [MeetupService],
 })
 export class MeetupModule {}

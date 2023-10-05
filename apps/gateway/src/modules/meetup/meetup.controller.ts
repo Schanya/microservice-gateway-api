@@ -21,13 +21,13 @@ import { MeetupService } from './meetup.service';
 
 import {
   CreateMeetupDto,
-  ElasticsearchMeetupDto,
+  EsMeetupDto,
   ReadAllMeetupDto,
   UpdateMeetupDto,
 } from './dto';
 import {
   CreateMeetupSchema,
-  ElasticsearchMeetupSchema,
+  EsMeetupSchema,
   ReadAllMeetupSchema,
   UpdateMeetupSchema,
 } from './schemas';
@@ -37,6 +37,18 @@ import { FrontendMeetup, MeetupSearchResult } from './types';
 @Controller('meetup')
 export class MeetupController {
   constructor(private readonly meetupService: MeetupService) {}
+
+  @Get('/search')
+  @HttpCode(HttpStatus.OK)
+  async esSearch(
+    @Query(new JoiValidationPipe(EsMeetupSchema))
+    search: EsMeetupDto,
+  ): Promise<MeetupSearchResult> {
+    const { searchText } = search;
+    const searchResult = await this.meetupService.esSearch(searchText);
+
+    return searchResult;
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -76,18 +88,6 @@ export class MeetupController {
     });
 
     return meetups;
-  }
-
-  @Get('search')
-  @HttpCode(HttpStatus.OK)
-  async search(
-    @Query(new JoiValidationPipe(ElasticsearchMeetupSchema))
-    elasticsearchMeetup: ElasticsearchMeetupDto,
-  ): Promise<MeetupSearchResult> {
-    const { searchText } = elasticsearchMeetup;
-    const searchResult = await this.meetupService.elasticsearch(searchText);
-
-    return searchResult;
   }
 
   @Put(':id')

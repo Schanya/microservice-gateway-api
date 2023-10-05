@@ -1,3 +1,3 @@
-export class ElasticsearchMeetupDto {
+export class EsMeetupDto {
   searchText: string;
 }

@@ -101,6 +101,13 @@ export class MeetupRepository {
           create: tagsEntity.map((tag) => ({ tag: { connect: { ...tag } } })),
         },
       },
+      include: {
+        tags: {
+          select: {
+            tag: true,
+          },
+        },
+      },
     });
 
     return updatedMeetup;

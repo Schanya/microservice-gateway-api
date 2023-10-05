@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
-import { ElasticsearchMeetupDto } from '../dto';
+import { EsMeetupDto } from '../dto';
 
-export const ElasticsearchMeetupSchema = Joi.object<ElasticsearchMeetupDto>({
+export const EsMeetupSchema = Joi.object<EsMeetupDto>({
   searchText: Joi.string().max(255).required(),
 });

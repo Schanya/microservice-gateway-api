@@ -5,7 +5,7 @@ import { FrontendMeetup } from '../meetup/types';
 import { MeetupSearchBody, MeetupSearchResult } from './types';
 
 @Injectable()
-export default class MeetupElasticsearchService {
+export class MeetupEsService {
   private index = 'meetup';
   constructor(private readonly elasticsearchService: ElasticsearchService) {}
 
