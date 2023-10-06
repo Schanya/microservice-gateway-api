@@ -67,11 +67,26 @@ export class MeetupRepository {
     const { column, direction } = sorting ?? defaultSorting;
     const { offset, size } = pagination ?? defaultPagination;
 
-    const { containsMeetupFilter, containsTagFilter } =
+    const { containsMeetupFilter, containsTagFilter, geolocationFilters } =
       MeetupFiltration.whereFilter(filters);
 
+    const geopositionSearchParam = {};
+
+    if (Object.keys(geolocationFilters).length) {
+      const { latitude, longitude } = geolocationFilters;
+      const query = await this.prisma.$queryRaw<
+        { id: number }[]
+      >`SELECT id FROM "Meetups" WHERE ST_DWithin(ST_MakePoint(longitude::float, latitude::float), ST_MakePoint(${longitude}::float, ${latitude}::float)::geography, 100 * 1000)`;
+
+      geopositionSearchParam['id'] = { in: query.map(({ id }) => id) };
+    }
+
     const meetups = await this.prisma.meetups.findMany({
-      where: { ...containsMeetupFilter, ...containsTagFilter },
+      where: {
+        ...containsMeetupFilter,
+        ...containsTagFilter,
+        ...geopositionSearchParam,
+      },
       orderBy: { [column]: direction },
       skip: offset,
       take: Number(size),

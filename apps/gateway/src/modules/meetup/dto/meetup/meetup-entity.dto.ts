@@ -6,5 +6,7 @@ export class Meetup {
   description: string;
   date: string;
   place: string;
+  latitude: number;
+  longitude: number;
   tags?: { tag: Tag }[];
 }
