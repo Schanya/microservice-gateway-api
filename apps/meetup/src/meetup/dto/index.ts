@@ -5,3 +5,4 @@ export * from './read-all-meetup.dto';
 
 export * from './filter/contains-meetup-filter.dto';
 export * from './filter/filter-meetup.dto';
+export * from './filter/geolocation.dto';

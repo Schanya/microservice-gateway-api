@@ -7,6 +7,8 @@ export class FrontendMeetup {
   date: string;
   place: string;
   organizerId: number;
+  latitude: number;
+  longitude: number;
   tags?: {
     id?: number;
     title?: string;
@@ -19,6 +21,8 @@ export class FrontendMeetup {
     this.date = meetup?.date;
     this.place = meetup?.place;
     this.organizerId = meetup?.organizerId;
+    this.latitude = meetup?.latitude;
+    this.longitude = meetup?.longitude;
     this.tags = meetup?.tags?.map((obj) => ({
       id: obj.tag.id,
       title: obj.tag.title,
