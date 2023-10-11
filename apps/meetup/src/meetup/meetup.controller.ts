@@ -5,6 +5,7 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
 import { MeetupService } from './meetup.service';
 import { FrontendMeetup, IReadAllMeetupOptions } from './types';
+import { MeetupSearchResult } from '../elasticsearch/types';
 
 @Controller()
 export class MeetupController {
@@ -39,6 +40,15 @@ export class MeetupController {
     const meetups = await this.meetupService.readAll(options);
 
     return meetups;
+  }
+
+  @MessagePattern('MEETUP_ES')
+  async elasticsearch(
+    @Payload('searchText') searchText: string,
+  ): Promise<MeetupSearchResult> {
+    const data = await this.meetupService.search(searchText);
+
+    return data;
   }
 
   @MessagePattern('MEETUP_UPDATE')

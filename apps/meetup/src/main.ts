@@ -17,6 +17,8 @@ async function bootstrap() {
 
   app.useLogger(logger);
 
+  app.init();
+
   await app.startAllMicroservices();
 }
 bootstrap();

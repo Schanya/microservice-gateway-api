@@ -4,6 +4,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   await prisma.$connect();
+
   await prisma.users.createMany({
     data: [
       {
@@ -33,13 +34,15 @@ async function main() {
       place: 'Vitebsk, Bogdan Khmelnitsky Street, 30',
       date: '12-12-2022 12:12:12',
       organizerId: 1,
+      latitude: -0.5667809731911143,
+      longitude: 73.50402828602577,
       tags: {
         create: [
           {
-            tag: { create: { title: 'dev' } },
+            tag: { create: { title: 'test' } },
           },
           {
-            tag: { create: { title: 'js' } },
+            tag: { create: { title: 'example' } },
           },
         ],
       },
@@ -53,13 +56,15 @@ async function main() {
       place: 'Vitebsk, Bogdan Khmelnitsky Street, 30',
       date: '12-12-2022 12:12:12',
       organizerId: 2,
+      latitude: -0.5667809731911143,
+      longitude: 73.50402828602577,
       tags: {
         create: [
           {
-            tag: { create: { title: 'nest' } },
+            tag: { create: { title: 'anna' } },
           },
           {
-            tag: { create: { title: 'ts' } },
+            tag: { create: { title: 'update' } },
           },
         ],
       },
@@ -73,13 +78,15 @@ async function main() {
       place: 'Vitebsk, Bogdan Khmelnitsky Street, 30',
       date: '12-12-2022 12:12:12',
       organizerId: 2,
+      latitude: 29.979672342008804,
+      longitude: 31.134075853963683,
       tags: {
         create: [
           {
-            tag: { create: { title: 'database' } },
+            tag: { create: { title: 'modsen' } },
           },
           {
-            tag: { create: { title: 'postgresql' } },
+            tag: { create: { title: 'success' } },
           },
         ],
       },
