@@ -1,10 +1,12 @@
-import { RmqModule } from '@app/common';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { envSchemaOptions } from '../common/configs/env-schema.config';
-import { MeetupModule } from './meetup/meetup.module';
-import { MicroserviceAllExceptionsFilter } from '@app/common';
 import { APP_FILTER } from '@nestjs/core';
+
+import { MicroserviceAllExceptionsFilter, RmqModule } from '@app/common';
+
+import { envSchemaOptions } from '../common/configs';
+
+import { MeetupModule } from './meetup/meetup.module';
 
 @Module({
   imports: [ConfigModule.forRoot(envSchemaOptions), RmqModule, MeetupModule],

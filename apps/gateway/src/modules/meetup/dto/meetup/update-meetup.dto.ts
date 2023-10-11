@@ -5,5 +5,7 @@ export class UpdateMeetupDto {
   description?: string;
   date?: string;
   place?: string;
+  latitude?: number;
+  longitude?: number;
   tags?: CreateTagDto[];
 }

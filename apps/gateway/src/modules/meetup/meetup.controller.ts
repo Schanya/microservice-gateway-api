@@ -19,18 +19,36 @@ import { JoiValidationPipe } from '@gateway/common/pipes';
 
 import { MeetupService } from './meetup.service';
 
-import { CreateMeetupDto, ReadAllMeetupDto, UpdateMeetupDto } from './dto';
+import {
+  CreateMeetupDto,
+  EsMeetupDto,
+  ReadAllMeetupDto,
+  UpdateMeetupDto,
+} from './dto';
 import {
   CreateMeetupSchema,
+  EsMeetupSchema,
   ReadAllMeetupSchema,
   UpdateMeetupSchema,
 } from './schemas';
-import { FrontendMeetup } from './types';
+import { FrontendMeetup, MeetupSearchResult } from './types';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
 export class MeetupController {
   constructor(private readonly meetupService: MeetupService) {}
+
+  @Get('/search')
+  @HttpCode(HttpStatus.OK)
+  async esSearch(
+    @Query(new JoiValidationPipe(EsMeetupSchema))
+    search: EsMeetupDto,
+  ): Promise<MeetupSearchResult> {
+    const { searchText } = search;
+    const searchResult = await this.meetupService.esSearch(searchText);
+
+    return searchResult;
+  }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

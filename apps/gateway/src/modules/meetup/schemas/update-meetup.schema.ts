@@ -5,5 +5,7 @@ export const UpdateMeetupSchema = Joi.object({
   description: Joi.string().max(255).optional(),
   date: Joi.string().optional(),
   place: Joi.string().optional(),
+  latitude: Joi.number().required(),
+  longitude: Joi.number().required(),
   tags: Joi.array().items(Joi.string()).min(1).optional(),
 });

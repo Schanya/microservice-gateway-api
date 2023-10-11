@@ -1,4 +1,5 @@
 import { IPaginationOptions, ISortingOptions } from '@app/common';
+import { GeolocationDto } from '../dto';
 
 export interface IReadAllMeetupOptions {
   filters?: {
@@ -8,7 +9,9 @@ export interface IReadAllMeetupOptions {
     place?: string;
     tags?: string[];
     organizerId?: number;
+    geolocation?: GeolocationDto;
   };
+
   pagination?: IPaginationOptions;
   sorting?: ISortingOptions;
 }
