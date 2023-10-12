@@ -68,20 +68,22 @@ export class UserController {
   async uploadAvatar(
     @UserParam() jwtPayload: JwtPayloadDto,
     @UploadedFile(new ImageValidationPipe()) file: Express.Multer.File,
-  ): Promise<string> {
-    return await this.userService.uploadAvatar(jwtPayload, file);
+  ): Promise<void> {
+    await this.userService.uploadAvatar(jwtPayload, file);
   }
 
   @Get('avatar/download/:id')
-  //   @Header('Content-Type', 'image/jpeg')
   @HttpCode(HttpStatus.OK)
   async downloadAvatar(
     @Param('id', ParseIntPipe) id: number,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<string> {
+  ): Promise<void> {
     const image = await this.userService.downloadAvatar(id);
 
-    return image;
+    if (image) {
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.send(image.data.Body);
+    }
   }
 
   @Delete('avatar/remove')

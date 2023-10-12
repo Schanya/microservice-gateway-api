@@ -1,11 +1,11 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 
-import { UserRepository } from './user.repository';
-import { CreateUserDto, FindUserDto, User } from './dto';
 import { AvatarDto, ReadAllResult } from '@app/common';
-import { FrontendUser, IReadAllUserOptions } from './types';
 import { JwtService } from '../jwt/jwt.service';
+import { CreateUserDto, FindUserDto, UpdateUserDto, User } from './dto';
+import { FrontendUser, IReadAllUserOptions } from './types';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {
@@ -53,6 +53,22 @@ export class UserService {
     await this.userRepository.delete(id);
   }
 
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    await this._doesUserExist({ id });
+
+    const sameUser = await this.readByUniqueField({
+      email: updateUserDto.email,
+    });
+
+    if (sameUser) {
+      throw new BadRequestException('Such user already exists');
+    }
+
+    const updatedUser = await this.userRepository.update(id, updateUserDto);
+
+    return updatedUser;
+  }
+
   private async _doesUserExist(options: FindUserDto): Promise<void> {
     const existingUser = await this.userRepository.readByUniqueField(options);
     if (!existingUser) {
@@ -64,52 +80,46 @@ export class UserService {
   }
 
   async uploadAvatar(id: number, filename: string): Promise<AvatarDto> {
-    const user = await this.userRepository.readByUniqueField({ id });
-
-    const oldAvatarFilename = user.avatar;
-
+    const { avatar } = await this.userRepository.readByUniqueField({ id });
     const avatarDto: AvatarDto = { avatarFilename: filename };
 
-    if (oldAvatarFilename) {
+    if (avatar) {
       avatarDto.hasOldAvatar = true;
-      avatarDto.oldAvatarFilename = oldAvatarFilename;
+      avatarDto.oldAvatarFilename = avatar;
     }
 
-    await this.userRepository.uploadAvatar(id, filename);
+    await this.userRepository.update(id, { avatar: filename });
 
     return avatarDto;
   }
 
   async downloadAvatar(id: number): Promise<AvatarDto> {
-    const avatarFilename = await this.userRepository.downloadAvatar(id);
+    const avatar = await this._getAvatarIfExist({ id });
 
-    if (!avatarFilename) {
-      throw new RpcException({
-        message: `No avatars to download`,
-        statusCode: HttpStatus.BAD_REQUEST,
-      });
-    }
-
-    const avatarDto: AvatarDto = { avatarFilename };
+    const avatarDto: AvatarDto = { avatarFilename: avatar };
 
     return avatarDto;
   }
 
   async removeAvatar(id: number): Promise<AvatarDto> {
-    const user = await this.userRepository.readByUniqueField({ id });
+    const avatar = await this._getAvatarIfExist({ id });
 
-    const avatar = user.avatar;
+    await this.userRepository.update(id, { avatar: null });
+    const avatarDto: AvatarDto = { avatarFilename: avatar };
+
+    return avatarDto;
+  }
+
+  private async _getAvatarIfExist(options: FindUserDto): Promise<string> {
+    const { avatar } = await this.userRepository.readByUniqueField(options);
 
     if (!avatar) {
       throw new RpcException({
-        message: `No avatars to remove`,
+        message: `The specified user doesn't have any avatar`,
         statusCode: HttpStatus.BAD_REQUEST,
       });
     }
 
-    await this.userRepository.removeAvatar(id);
-    const avatarDto: AvatarDto = { avatarFilename: avatar };
-
-    return avatarDto;
+    return avatar;
   }
 }

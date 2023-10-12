@@ -24,6 +24,7 @@ export class UserController {
   @MessagePattern('USER_GET_BY_ID')
   async readBy(@Payload('id') id: number): Promise<FrontendUser> {
     const user = await this.userService.readByUniqueField({ id });
+
     return new FrontendUser(user);
   }
 
@@ -38,6 +39,7 @@ export class UserController {
     @Payload('filename') filename: string,
   ): Promise<AvatarDto> {
     const avatarDto = await this.userService.uploadAvatar(id, filename);
+
     return avatarDto;
   }
 
@@ -46,12 +48,14 @@ export class UserController {
     @Payload('id', ParseIntPipe) id: number,
   ): Promise<AvatarDto> {
     const avatarDto = await this.userService.downloadAvatar(id);
+
     return avatarDto;
   }
 
   @MessagePattern('USER_REMOVE_AVATAR')
   async removeAvatar(@Payload('id', ParseIntPipe) id: number) {
     const avatarDto = await this.userService.removeAvatar(id);
+
     return avatarDto;
   }
 }

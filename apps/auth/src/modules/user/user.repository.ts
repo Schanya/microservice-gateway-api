@@ -5,7 +5,7 @@ import {
   defaultSorting,
 } from '@app/common';
 import { Injectable } from '@nestjs/common';
-import { CreateUserDto, FindUserDto, User } from './dto';
+import { CreateUserDto, FindUserDto, UpdateUserDto, User } from './dto';
 import { IReadAllUserOptions } from './types';
 
 @Injectable()
@@ -47,38 +47,18 @@ export class UserRepository {
     return user.length ? user[0] : null;
   }
 
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.prisma.users.update({
+      where: { id },
+      data: { ...updateUserDto },
+    });
+
+    return user;
+  }
+
   async delete(id: number): Promise<void> {
     await this.prisma.users.delete({
       where: { id },
-    });
-  }
-
-  async uploadAvatar(id: number, filename: string): Promise<void> {
-    await this.prisma.users.update({
-      where: { id },
-      data: {
-        avatar: filename,
-      },
-    });
-  }
-
-  async downloadAvatar(id: number): Promise<string> {
-    const user = await this.prisma.users.findUnique({
-      where: { id },
-      select: {
-        avatar: true,
-      },
-    });
-
-    return user.avatar;
-  }
-
-  async removeAvatar(id: number) {
-    await this.prisma.users.update({
-      where: { id },
-      data: {
-        avatar: null,
-      },
     });
   }
 }
