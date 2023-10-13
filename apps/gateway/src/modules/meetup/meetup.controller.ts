@@ -3,16 +3,18 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
   Post,
   Put,
   Query,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 
-import { JwtPayloadDto } from '@app/common';
+import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { UserParam } from '@gateway/common/decorators';
 import { JwtAuthGuard, RolesGuard } from '@gateway/common/guards';
 import { JoiValidationPipe } from '@gateway/common/pipes';
@@ -50,6 +52,24 @@ export class MeetupController {
     return searchResult;
   }
 
+  @Get('generate-csv-report')
+  @Header('Content-Type', 'text/csv')
+  @Header('Content-Disposition', 'attachment; filename="csv-report.csv"')
+  async generateCsvReport(
+    @Query(new JoiValidationPipe(ReadAllMeetupSchema))
+    options: ReadAllMeetupDto,
+  ): Promise<any> {
+    const { pagination, sorting, ...filters } = options;
+
+    const output = await this.meetupService.generateCsvReport({
+      pagination,
+      sorting,
+      filters,
+    });
+
+    return new StreamableFile(output);
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
@@ -78,7 +98,7 @@ export class MeetupController {
   async readAll(
     @Query(new JoiValidationPipe(ReadAllMeetupSchema))
     options: ReadAllMeetupDto,
-  ): Promise<FrontendMeetup[]> {
+  ): Promise<ReadAllResult<FrontendMeetup>> {
     const { pagination, sorting, ...filters } = options;
 
     const meetups = await this.meetupService.readAll({

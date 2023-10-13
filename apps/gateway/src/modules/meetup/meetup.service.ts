@@ -1,14 +1,20 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { JwtPayloadDto } from '@app/common';
+import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { sendMessage } from '@gateway/common/utils';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 
+import { stringify } from 'csv-stringify';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
 import {
   FrontendMeetup,
   IReadAllMeetupOptions,
   MeetupSearchResult,
 } from './types';
+import { Response } from 'express';
 
 @Injectable()
 export class MeetupService {
@@ -40,8 +46,10 @@ export class MeetupService {
     return meetup;
   }
 
-  async readAll(options: IReadAllMeetupOptions): Promise<FrontendMeetup[]> {
-    const meetups: FrontendMeetup[] = await sendMessage({
+  async readAll(
+    options: IReadAllMeetupOptions,
+  ): Promise<ReadAllResult<FrontendMeetup>> {
+    const meetups = await sendMessage<ReadAllResult<FrontendMeetup>>({
       client: this.client,
       metadata: 'MEETUP_GET_ALL',
       data: { options },
@@ -79,5 +87,13 @@ export class MeetupService {
       metadata: 'MEETUP_DELETE',
       data: { id },
     });
+  }
+
+  async generateCsvReport(options: IReadAllMeetupOptions): Promise<any> {
+    const meetups = await this.readAll(options);
+
+    const output = stringify(meetups.records, { header: true, delimiter: ';' });
+
+    return output;
   }
 }
