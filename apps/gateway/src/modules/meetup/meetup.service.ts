@@ -1,18 +1,19 @@
-import { JwtPayloadDto, ReadAllResult } from '@app/common';
-import { sendMessage } from '@gateway/common/utils';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
-import { stringify } from 'csv-stringify';
-import * as ejs from 'ejs';
-import * as pdf from 'html-pdf';
+import { JwtPayloadDto, ReadAllResult } from '@app/common';
+import { sendMessage } from '@gateway/common/utils';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
 import {
   FrontendMeetup,
   IReadAllMeetupOptions,
   MeetupSearchResult,
 } from './types';
-import { ReadStream } from 'fs';
+
+import * as ejs from 'ejs';
+import * as pdf from 'html-pdf';
+
+import { stringify } from 'csv-stringify';
 import { Response } from 'express';
 
 @Injectable()
@@ -124,5 +125,34 @@ export class MeetupService {
         });
       },
     );
+  }
+
+  async joinToMeetup(
+    meetupId: number,
+    member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await sendMessage<FrontendMeetup>({
+      client: this.client,
+      metadata: 'MEETUP_JOIN',
+      data: {
+        meetupId,
+        member,
+      },
+    });
+
+    return meetup;
+  }
+
+  async leaveFromMeetup(
+    meetupId: number,
+    member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await sendMessage<FrontendMeetup>({
+      client: this.client,
+      metadata: 'MEETUP_LEAVE',
+      data: { meetupId, member },
+    });
+
+    return meetup;
   }
 }

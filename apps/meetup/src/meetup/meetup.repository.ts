@@ -143,6 +143,55 @@ export class MeetupRepository {
     });
   }
 
+  async joinToMeetup(meetupId: number, memberId: number): Promise<Meetup> {
+    const meetup = await this.prisma.meetups.update({
+      where: { id: meetupId },
+      data: {
+        members: {
+          create: {
+            userId: memberId,
+          },
+        },
+      },
+
+      include: {
+        members: { select: { user: { select: { id: true, email: true } } } },
+      },
+    });
+
+    return meetup;
+  }
+
+  async leaveFromMeetup(meetupId: number, memberId: number): Promise<Meetup> {
+    const meetup = await this.prisma.meetups.update({
+      where: { id: meetupId },
+      data: {
+        members: {
+          deleteMany: {
+            userId: memberId,
+          },
+        },
+      },
+
+      include: {
+        members: { select: { user: { select: { id: true, email: true } } } },
+      },
+    });
+
+    return meetup;
+  }
+
+  async isJoined(meetupId: number, memberId: number): Promise<boolean> {
+    const meetups = await this.prisma.meetupsToUsers.findMany({
+      where: {
+        meetupId: meetupId,
+        userId: memberId,
+      },
+    });
+
+    return meetups.length !== 0;
+  }
+
   private async _getAndCreateTags(createTagsDto: string[]): Promise<Tag[]> {
     const tags: Tag[] = [];
 

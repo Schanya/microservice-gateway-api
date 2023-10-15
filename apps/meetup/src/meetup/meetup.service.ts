@@ -70,6 +70,43 @@ export class MeetupService {
     await this.meetupRepository.delete(id);
   }
 
+  async joinToMeetup(meetupId: number, member: JwtPayloadDto): Promise<Meetup> {
+    const isJoined = await this.meetupRepository.isJoined(meetupId, member.id);
+    if (isJoined) {
+      throw new RpcException({
+        message: `You are already joined to the meetup`,
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const meetup = await this.meetupRepository.joinToMeetup(
+      meetupId,
+      member.id,
+    );
+
+    return meetup;
+  }
+
+  async leaveFromMeetup(
+    meetupId: number,
+    member: JwtPayloadDto,
+  ): Promise<Meetup> {
+    const isJoined = await this.meetupRepository.isJoined(meetupId, member.id);
+    if (!isJoined) {
+      throw new RpcException({
+        message: `You aren\`t joined to the meetup`,
+        statusCode: HttpStatus.BAD_REQUEST,
+      });
+    }
+
+    const meetup = await this.meetupRepository.leaveFromMeetup(
+      meetupId,
+      member.id,
+    );
+
+    return meetup;
+  }
+
   private async _doesExistMeetup(id: number): Promise<void> {
     const existingMeetup = await this.meetupRepository.readById(id);
     if (!existingMeetup) {

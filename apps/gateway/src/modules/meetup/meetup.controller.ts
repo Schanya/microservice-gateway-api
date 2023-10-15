@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -89,6 +90,28 @@ export class MeetupController {
       },
       res,
     );
+  }
+
+  @Post('join/:id')
+  @HttpCode(HttpStatus.CREATED)
+  public async joinToMeetup(
+    @Param('id', ParseIntPipe) meetupId: number,
+    @UserParam() member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await this.meetupService.joinToMeetup(meetupId, member);
+
+    return meetup;
+  }
+
+  @Post('leave/:id')
+  @HttpCode(HttpStatus.CREATED)
+  public async leaveFromMeetup(
+    @Param('id', ParseIntPipe) meetupId: number,
+    @UserParam() member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await this.meetupService.leaveFromMeetup(meetupId, member);
+
+    return meetup;
   }
 
   @Post()
