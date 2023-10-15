@@ -1,0 +1,13 @@
+DATABASE_URL="postgresql://postgres:postgres@postgres:5432/meetup_micro_db?schema=public"
+
+RABBIT_MQ_URI='amqp://rabbitmq:5672'
+RABBIT_MQ_AUTH_QUEUE='RABBIT_MQ_AUTH_QUEUE'
+
+ACCESS_TOKEN_SECRET="secret"
+ACCESS_TOKEN_EXPIRED="3600s"
+
+REFRESH_TOKEN_SECRET="REFRESH_SECRET"
+REFRESH_TOKEN_EXPIRED="1d"
+
+GOOGLE_CLIENT_ID="777244868804-j8jh0q58p0b5si00daq4dcuqpbdpgqqm.apps.googleusercontent.com"
+GOOGLE_SECRET="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"

@@ -6,14 +6,16 @@ services:
     image: rabbitmq
     ports:
       - '5672:5672'
+    networks:
+      - elastic
 
-  meetup:
+  auth:
     build:
       context: .
-      dockerfile: ./apps/meetup/Dockerfile
-    command: npm run start:dev meetup
+      dockerfile: ./apps/auth/Dockerfile
+    command: npm run start:dev auth && npm run prisma:client && npm run prisma:migrate && npx prisma db seed 
     env_file:
-      - ./apps/meetup/.envDocker
+      - ./apps/auth/.envDocker
     depends_on:
       - postgres
       - rabbitmq
@@ -21,7 +23,28 @@ services:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
+      - 4001:4001
+    networks:
+      - elastic
+
+  meetup:
+    build:
+      context: .
+      dockerfile: ./apps/meetup/Dockerfile
+    command:  npm run start:dev meetup && npm run prisma:client && npm run prisma:migrate && npx prisma db seed 
+    env_file:
+      - ./apps/meetup/.envDocker
+    depends_on:
+      - postgres
+      - rabbitmq
+      - elasticsearch
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
       - 4000:4000
+    networks:
+      - elastic
 
   gateway:
     build:
@@ -32,15 +55,18 @@ services:
       - ./apps/gateway/.envDocker
     depends_on:
       - meetup
+      - auth
       - rabbitmq
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
     ports:
       - 3000:3000
+    networks:
+      - elastic
 
   postgres:
-    image: postgres:13.5
+    image: postgis/postgis:13-3.4
     restart: always
     environment:
       - POSTGRES_USER=postgres
@@ -52,8 +78,26 @@ services:
       - postgres:/var/lib/postgresql/data
     ports:
       - '5432:5432'
+    networks:
+      - elastic
+
+  elasticsearch:
+    image: elasticsearch:8.10.2
+    ports:
+      - 9200:9200
+    environment:
+      discovery.type: 'single-node'
+      xpack.security.enabled: 'true'
+      ELASTIC_PASSWORD: 'rxI2de2zHgnmKYkfToDh'
+    networks:
+      - elastic
+    mem_limit: 1g
+            
 
 volumes:
   postgres:
+
+networks:
+  elastic:
   
  
