@@ -2,10 +2,10 @@ import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { Controller, ParseIntPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
+import { MeetupSearchResult } from '../elasticsearch/types';
 import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
 import { MeetupService } from './meetup.service';
 import { FrontendMeetup, IReadAllMeetupOptions } from './types';
-import { MeetupSearchResult } from '../elasticsearch/types';
 
 @Controller()
 export class MeetupController {

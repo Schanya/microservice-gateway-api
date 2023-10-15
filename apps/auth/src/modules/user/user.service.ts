@@ -1,7 +1,12 @@
 import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 
-import { AvatarDto, ReadAllResult } from '@app/common';
+import {
+  AvatarDto,
+  PrismaService,
+  ReadAllResult,
+  TransactionClient,
+} from '@app/common';
 import { JwtService } from '../jwt/jwt.service';
 import { CreateUserDto, FindUserDto, UpdateUserDto, User } from './dto';
 import { FrontendUser, IReadAllUserOptions } from './types';
@@ -12,6 +17,7 @@ export class UserService {
   constructor(
     private readonly userRepository: UserRepository,
     private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async readAll(
@@ -22,21 +28,33 @@ export class UserService {
     return readAllUser;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const existedUser = await this.readByUniqueField({
-      email: createUserDto.email,
-    });
+  async create(
+    createUserDto: CreateUserDto,
+    transaction?: TransactionClient,
+  ): Promise<User> {
+    const transactionResult = await this.prisma.$transaction(
+      async (transaction: TransactionClient) => {
+        const existedUser = await this.readByUniqueField({
+          email: createUserDto.email,
+        });
 
-    if (existedUser) {
-      throw new RpcException({
-        message: `The specified user already exists`,
-        statusCode: HttpStatus.BAD_REQUEST,
-      });
-    }
+        if (existedUser) {
+          throw new RpcException({
+            message: `The specified user already exists`,
+            statusCode: HttpStatus.BAD_REQUEST,
+          });
+        }
 
-    const createdUser = await this.userRepository.create(createUserDto);
+        const createdUser = await this.userRepository.create(
+          createUserDto,
+          transaction,
+        );
 
-    return createdUser;
+        return createdUser;
+      },
+    );
+
+    return transactionResult;
   }
 
   async readByUniqueField(options: FindUserDto): Promise<User> {
@@ -45,28 +63,46 @@ export class UserService {
     return user;
   }
 
-  async delete(id: number): Promise<void> {
-    await this._doesUserExist({ id });
+  async delete(id: number, transaction?: TransactionClient): Promise<void> {
+    const transactionResult = await this.prisma.$transaction(
+      async (transaction: TransactionClient) => {
+        await this._doesUserExist({ id });
 
-    await this.jwtService.deleteAllJwt(id);
+        await this.jwtService.deleteAllJwt(id, transaction);
 
-    await this.userRepository.delete(id);
+        await this.userRepository.delete(id, transaction);
+      },
+    );
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    await this._doesUserExist({ id });
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    transaction?: TransactionClient,
+  ): Promise<User> {
+    const transactionResult = await this.prisma.$transaction(
+      async (transaction: TransactionClient) => {
+        await this._doesUserExist({ id });
 
-    const sameUser = await this.readByUniqueField({
-      email: updateUserDto.email,
-    });
+        const sameUser = await this.readByUniqueField({
+          email: updateUserDto.email,
+        });
 
-    if (sameUser) {
-      throw new BadRequestException('Such user already exists');
-    }
+        if (sameUser) {
+          throw new BadRequestException('Such user already exists');
+        }
 
-    const updatedUser = await this.userRepository.update(id, updateUserDto);
+        const updatedUser = await this.userRepository.update(
+          id,
+          updateUserDto,
+          transaction,
+        );
 
-    return updatedUser;
+        return updatedUser;
+      },
+    );
+
+    return transactionResult;
   }
 
   private async _doesUserExist(options: FindUserDto): Promise<void> {

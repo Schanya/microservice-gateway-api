@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtPayloadDto } from '@app/common';
+import { JwtPayloadDto, PrismaService, TransactionClient } from '@app/common';
 
 import { JwtService as NestJwtService } from '@nestjs/jwt';
 import { JwtRepository } from './jwt.repository';
@@ -52,15 +52,26 @@ export class JwtService {
     return jwt;
   }
 
-  public async saveJwt(userId: number, refreshToken: string): Promise<void> {
-    await this.jwtRepository.saveJwt(userId, refreshToken);
+  public async saveJwt(
+    userId: number,
+    refreshToken: string,
+    transaction?: TransactionClient,
+  ): Promise<void> {
+    await this.jwtRepository.saveJwt(userId, refreshToken, transaction);
   }
 
-  public async deleteJwt(userId: number, refreshToken: string): Promise<void> {
-    await this.jwtRepository.deleteJwt(userId, refreshToken);
+  public async deleteJwt(
+    userId: number,
+    refreshToken: string,
+    transaction?: TransactionClient,
+  ): Promise<void> {
+    await this.jwtRepository.deleteJwt(userId, refreshToken, transaction);
   }
 
-  public async deleteAllJwt(userId: number): Promise<void> {
-    await this.jwtRepository.deleteAllJwt(userId);
+  public async deleteAllJwt(
+    userId: number,
+    transaction?: TransactionClient,
+  ): Promise<void> {
+    await this.jwtRepository.deleteAllJwt(userId, transaction);
   }
 }
