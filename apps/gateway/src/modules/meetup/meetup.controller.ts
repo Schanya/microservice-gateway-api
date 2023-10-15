@@ -10,6 +10,7 @@ import {
   Post,
   Put,
   Query,
+  Res,
   StreamableFile,
   UseGuards,
 } from '@nestjs/common';
@@ -20,6 +21,7 @@ import { JwtAuthGuard, RolesGuard } from '@gateway/common/guards';
 import { JoiValidationPipe } from '@gateway/common/pipes';
 
 import { MeetupService } from './meetup.service';
+import { Response } from 'express';
 
 import {
   CreateMeetupDto,
@@ -34,6 +36,7 @@ import {
   UpdateMeetupSchema,
 } from './schemas';
 import { FrontendMeetup, MeetupSearchResult } from './types';
+import * as pdf from 'html-pdf';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
@@ -58,7 +61,7 @@ export class MeetupController {
   async generateCsvReport(
     @Query(new JoiValidationPipe(ReadAllMeetupSchema))
     options: ReadAllMeetupDto,
-  ): Promise<any> {
+  ): Promise<StreamableFile> {
     const { pagination, sorting, ...filters } = options;
 
     const output = await this.meetupService.generateCsvReport({
@@ -68,6 +71,24 @@ export class MeetupController {
     });
 
     return new StreamableFile(output);
+  }
+
+  @Get('generate-pdf-report')
+  async generatePdfReport(
+    @Query(new JoiValidationPipe(ReadAllMeetupSchema))
+    options: ReadAllMeetupDto,
+    @Res() res: Response,
+  ): Promise<void> {
+    const { pagination, sorting, ...filters } = options;
+
+    await this.meetupService.generatePdfReport(
+      {
+        pagination,
+        sorting,
+        filters,
+      },
+      res,
+    );
   }
 
   @Post()

@@ -1,19 +1,18 @@
 import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { sendMessage } from '@gateway/common/utils';
-import {
-  Inject,
-  Injectable,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
 import { stringify } from 'csv-stringify';
+import * as ejs from 'ejs';
+import * as pdf from 'html-pdf';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
 import {
   FrontendMeetup,
   IReadAllMeetupOptions,
   MeetupSearchResult,
 } from './types';
+import { ReadStream } from 'fs';
 import { Response } from 'express';
 
 @Injectable()
@@ -95,5 +94,35 @@ export class MeetupService {
     const output = stringify(meetups.records, { header: true, delimiter: ';' });
 
     return output;
+  }
+
+  async generatePdfReport(
+    options: IReadAllMeetupOptions,
+    res: Response,
+  ): Promise<void> {
+    const meetups = await this.readAll(options);
+
+    const template = `./apps/gateway/src/modules/meetup/templates/pdf.template.ejs`;
+
+    ejs.renderFile(
+      template,
+      { meetups: meetups.records },
+      async function (err, html) {
+        if (err) {
+          res.status(500).send(err);
+          return;
+        }
+        pdf.create(html).toBuffer(function (err, buf) {
+          if (err) {
+            res.status(500).send(err);
+            return;
+          } else {
+            res.attachment('pdf-report.pdf');
+            res.setHeader('Content-Type', 'text/pdf');
+            res.status(200).send(buf);
+          }
+        });
+      },
+    );
   }
 }
