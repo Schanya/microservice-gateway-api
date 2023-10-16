@@ -21,8 +21,8 @@ import { UserParam } from '@gateway/common/decorators';
 import { JwtAuthGuard, RolesGuard } from '@gateway/common/guards';
 import { JoiValidationPipe } from '@gateway/common/pipes';
 
-import { MeetupService } from './meetup.service';
 import { Response } from 'express';
+import { MeetupService } from './meetup.service';
 
 import {
   CreateMeetupDto,
@@ -37,7 +37,6 @@ import {
   UpdateMeetupSchema,
 } from './schemas';
 import { FrontendMeetup, MeetupSearchResult } from './types';
-import * as pdf from 'html-pdf';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
