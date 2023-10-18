@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-    "start": "nest start",
+    "start": " nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/gateway/main",
@@ -19,7 +19,12 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/gateway/test/jest-e2e.json",
     "prisma:client": "npx prisma generate --schema ./libs/common/src/prisma/schema.prisma",
-    "prisma:migrate": "dotenv -e ./libs/common/.env -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma"
+    "prisma:migrate": "dotenv -e ./libs/common/.env -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma",
+    "docker:prisma:client": "npx prisma generate --schema ./libs/common/src/prisma/schema.prisma",
+    "docker:prisma:migrate": "dotenv -e ./libs/common/.envDocker -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma",
+    "docker:prisma:seed": "dotenv -e ./libs/common/.envDocker -- ts-node ./libs/common/src/prisma/seeds/seed.ts",
+    "docker:start:auth": "npm run docker:prisma:client && npm run docker:prisma:migrate && npm run docker:prisma:seed || npm run start auth",
+    "docker:start:meetup": "npm run docker:prisma:client && npm run docker:prisma:migrate && npm run docker:prisma:seed || npm run start meetup"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.10.0",
