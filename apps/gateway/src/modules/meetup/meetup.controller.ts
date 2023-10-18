@@ -74,21 +74,21 @@ export class MeetupController {
   }
 
   @Get('generate-pdf-report')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'attachment; filename="pdf-report.pdf"')
   async generatePdfReport(
     @Query(new JoiValidationPipe(ReadAllMeetupSchema))
     options: ReadAllMeetupDto,
-    @Res() res: Response,
-  ): Promise<void> {
+  ): Promise<StreamableFile> {
     const { pagination, sorting, ...filters } = options;
 
-    await this.meetupService.generatePdfReport(
-      {
-        pagination,
-        sorting,
-        filters,
-      },
-      res,
-    );
+    const output = await this.meetupService.generatePdfReport({
+      pagination,
+      sorting,
+      filters,
+    });
+
+    return new StreamableFile(output);
   }
 
   @Post('join/:id')

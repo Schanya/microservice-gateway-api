@@ -3,6 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 
 import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { sendMessage } from '@gateway/common/utils';
+import { stringify } from 'csv-stringify';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
 import {
   FrontendMeetup,
@@ -10,11 +11,9 @@ import {
   MeetupSearchResult,
 } from './types';
 
-import * as ejs from 'ejs';
-import * as pdf from 'html-pdf';
-
-import { stringify } from 'csv-stringify';
-import { Response } from 'express';
+import { Buffer } from 'node:buffer';
+import PdfPrinter from 'pdfmake';
+import { docDefinition, fonts } from './constants';
 
 @Injectable()
 export class MeetupService {
@@ -87,34 +86,38 @@ export class MeetupService {
     return output;
   }
 
-  async generatePdfReport(
-    options: IReadAllMeetupOptions,
-    res: Response,
-  ): Promise<void> {
-    const meetups = await this.readAll(options);
+  async generatePdfReport(options: IReadAllMeetupOptions): Promise<Buffer> {
+    const { records } = await this.readAll(options);
 
-    const template = `./apps/gateway/src/modules/meetup/templates/pdf.template.ejs`;
+    for (let i = 0; i < records.length; i++) {
+      const meetup = records[i];
+      const geolocation = `Latitude: ${meetup.latitude}\n Longitude: ${meetup.longitude}`;
+      const tags = meetup.tags.map((obj) => obj.title).join(', ');
 
-    ejs.renderFile(
-      template,
-      { meetups: meetups.records },
-      async function (err, html) {
-        if (err) {
-          res.status(500).send(err);
-          return;
-        }
-        pdf.create(html).toBuffer(function (err, buf) {
-          if (err) {
-            res.status(500).send(err);
-            return;
-          } else {
-            res.attachment('pdf-report.pdf');
-            res.setHeader('Content-Type', 'text/pdf');
-            res.status(200).send(buf);
-          }
-        });
-      },
-    );
+      docDefinition.content[0].table.body.push([
+        i + 1,
+        meetup.title,
+        meetup.description,
+        meetup.date,
+        meetup.place,
+        geolocation,
+        tags,
+      ]);
+    }
+
+    const printer = new PdfPrinter(fonts);
+    const pdfDoc = printer.createPdfKitDocument(docDefinition);
+
+    return new Promise<Buffer>((resolve, reject) => {
+      try {
+        const chunks: Uint8Array[] = [];
+        pdfDoc.on('data', (chunk) => chunks.push(chunk));
+        pdfDoc.on('end', () => resolve(Buffer.concat(chunks)));
+        pdfDoc.end();
+      } catch (err) {
+        reject(err);
+      }
+    });
   }
 
   async joinToMeetup(

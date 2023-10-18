@@ -27,6 +27,7 @@
       "@gateway/common/*": [
         "apps/gateway/src/common/*"
       ]
-    }
+    },
+    "esModuleInterop":true
   }
 }
