@@ -36,10 +36,13 @@ export class MeetupController {
   @MessagePattern('MEETUP_GET_ALL')
   async readAll(
     @Payload('options') options: IReadAllMeetupOptions,
-  ): Promise<ReadAllResult<Meetup>> {
+  ): Promise<ReadAllResult<FrontendMeetup>> {
     const meetups = await this.meetupService.readAll(options);
 
-    return meetups;
+    return {
+      totalRecordsNumber: meetups.totalRecordsNumber,
+      records: meetups.records.map((meetup) => new FrontendMeetup(meetup)),
+    };
   }
 
   @MessagePattern('MEETUP_ES')

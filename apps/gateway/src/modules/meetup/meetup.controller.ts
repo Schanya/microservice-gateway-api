@@ -20,8 +20,8 @@ import { UserParam } from '@gateway/common/decorators';
 import { JwtAuthGuard, RolesGuard } from '@gateway/common/guards';
 import { JoiValidationPipe } from '@gateway/common/pipes';
 
-import { MeetupService } from './meetup.service';
 import { Response } from 'express';
+import { MeetupService } from './meetup.service';
 
 import {
   CreateMeetupDto,
@@ -36,7 +36,6 @@ import {
   UpdateMeetupSchema,
 } from './schemas';
 import { FrontendMeetup, MeetupSearchResult } from './types';
-import * as pdf from 'html-pdf';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('meetup')
@@ -74,21 +73,21 @@ export class MeetupController {
   }
 
   @Get('generate-pdf-report')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'attachment; filename="pdf-report.pdf"')
   async generatePdfReport(
     @Query(new JoiValidationPipe(ReadAllMeetupSchema))
     options: ReadAllMeetupDto,
-    @Res() res: Response,
-  ): Promise<void> {
+  ): Promise<StreamableFile> {
     const { pagination, sorting, ...filters } = options;
 
-    await this.meetupService.generatePdfReport(
-      {
-        pagination,
-        sorting,
-        filters,
-      },
-      res,
-    );
+    const output = await this.meetupService.generatePdfReport({
+      pagination,
+      sorting,
+      filters,
+    });
+
+    return new StreamableFile(output);
   }
 
   @Post()
