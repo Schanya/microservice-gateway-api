@@ -22,8 +22,6 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    ports:
-      - 4001:4001
     networks:
       - elastic
 
@@ -41,8 +39,6 @@ services:
     volumes:
       - .:/usr/src/app
       - /usr/src/app/node_modules
-    ports:
-      - 4000:4000
     networks:
       - elastic
 
@@ -57,10 +53,14 @@ services:
       - meetup
       - auth
       - rabbitmq
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     ports:
       - 3000:3000
     networks:
       - elastic
+      
 
   postgres:
     image: postgis/postgis:13-3.4
