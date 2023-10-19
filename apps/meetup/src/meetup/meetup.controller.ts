@@ -2,10 +2,10 @@ import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { Controller, ParseIntPipe } from '@nestjs/common';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 
+import { MeetupSearchResult } from '../elasticsearch/types';
 import { CreateMeetupDto, Meetup, UpdateMeetupDto } from './dto';
 import { MeetupService } from './meetup.service';
 import { FrontendMeetup, IReadAllMeetupOptions } from './types';
-import { MeetupSearchResult } from '../elasticsearch/types';
 
 @Controller()
 export class MeetupController {
@@ -36,10 +36,13 @@ export class MeetupController {
   @MessagePattern('MEETUP_GET_ALL')
   async readAll(
     @Payload('options') options: IReadAllMeetupOptions,
-  ): Promise<ReadAllResult<Meetup>> {
+  ): Promise<ReadAllResult<FrontendMeetup>> {
     const meetups = await this.meetupService.readAll(options);
 
-    return meetups;
+    return {
+      totalRecordsNumber: meetups.totalRecordsNumber,
+      records: meetups.records.map((meetup) => new FrontendMeetup(meetup)),
+    };
   }
 
   @MessagePattern('MEETUP_ES')
@@ -62,9 +65,27 @@ export class MeetupController {
   }
 
   @MessagePattern('MEETUP_DELETE')
-  async deleteById(@Payload('id', ParseIntPipe) id: number): Promise<string> {
+  async deleteById(@Payload('id', ParseIntPipe) id: number): Promise<void> {
     await this.meetupService.delete(id);
+  }
 
-    return 'sucess';
+  @MessagePattern('MEETUP_JOIN')
+  async joinToMeetup(
+    @Payload('meetupId', ParseIntPipe) meetupId: number,
+    @Payload('member') member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await this.meetupService.joinToMeetup(meetupId, member);
+
+    return new FrontendMeetup(meetup);
+  }
+
+  @MessagePattern('MEETUP_LEAVE')
+  async leaveFromMeetup(
+    @Payload('meetupId', ParseIntPipe) meetupId: number,
+    @Payload('member') member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await this.meetupService.leaveFromMeetup(meetupId, member);
+
+    return new FrontendMeetup(meetup);
   }
 }
