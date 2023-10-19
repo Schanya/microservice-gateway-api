@@ -3,20 +3,25 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   HttpStatus,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
+  Res,
+  StreamableFile,
   UseGuards,
 } from '@nestjs/common';
 
-import { JwtPayloadDto } from '@app/common';
+import { JwtPayloadDto, ReadAllResult } from '@app/common';
 import { UserParam } from '@gateway/common/decorators';
 import { JwtAuthGuard, RolesGuard } from '@gateway/common/guards';
 import { JoiValidationPipe } from '@gateway/common/pipes';
 
+import { Response } from 'express';
 import { MeetupService } from './meetup.service';
 
 import {
@@ -50,6 +55,64 @@ export class MeetupController {
     return searchResult;
   }
 
+  @Get('generate-csv-report')
+  @Header('Content-Type', 'text/csv')
+  @Header('Content-Disposition', 'attachment; filename="csv-report.csv"')
+  async generateCsvReport(
+    @Query(new JoiValidationPipe(ReadAllMeetupSchema))
+    options: ReadAllMeetupDto,
+  ): Promise<StreamableFile> {
+    const { pagination, sorting, ...filters } = options;
+
+    const output = await this.meetupService.generateCsvReport({
+      pagination,
+      sorting,
+      filters,
+    });
+
+    return new StreamableFile(output);
+  }
+
+  @Get('generate-pdf-report')
+  @Header('Content-Type', 'application/pdf')
+  @Header('Content-Disposition', 'attachment; filename="pdf-report.pdf"')
+  async generatePdfReport(
+    @Query(new JoiValidationPipe(ReadAllMeetupSchema))
+    options: ReadAllMeetupDto,
+  ): Promise<StreamableFile> {
+    const { pagination, sorting, ...filters } = options;
+
+    const output = await this.meetupService.generatePdfReport({
+      pagination,
+      sorting,
+      filters,
+    });
+
+    return new StreamableFile(output);
+  }
+
+  @Post('join/:id')
+  @HttpCode(HttpStatus.CREATED)
+  public async joinToMeetup(
+    @Param('id', ParseIntPipe) meetupId: number,
+    @UserParam() member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await this.meetupService.joinToMeetup(meetupId, member);
+
+    return meetup;
+  }
+
+  @Post('leave/:id')
+  @HttpCode(HttpStatus.CREATED)
+  public async leaveFromMeetup(
+    @Param('id', ParseIntPipe) meetupId: number,
+    @UserParam() member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await this.meetupService.leaveFromMeetup(meetupId, member);
+
+    return meetup;
+  }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
@@ -78,7 +141,7 @@ export class MeetupController {
   async readAll(
     @Query(new JoiValidationPipe(ReadAllMeetupSchema))
     options: ReadAllMeetupDto,
-  ): Promise<FrontendMeetup[]> {
+  ): Promise<ReadAllResult<FrontendMeetup>> {
     const { pagination, sorting, ...filters } = options;
 
     const meetups = await this.meetupService.readAll({

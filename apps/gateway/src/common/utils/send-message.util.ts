@@ -1,5 +1,4 @@
 import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
 
 type SendMessageOptions = {
   client: ClientProxy;

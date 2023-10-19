@@ -1,6 +1,7 @@
 import {
   PrismaService,
   ReadAllResult,
+  TransactionClient,
   defaultPagination,
   defaultSorting,
 } from '@app/common';
@@ -23,12 +24,14 @@ export class MeetupRepository {
   async create(
     createMeetupDto: CreateMeetupDto,
     organizerId: number,
+    transaction?: TransactionClient,
   ): Promise<Meetup> {
     const { tags, ...meetupOptions } = createMeetupDto;
+    const executer = transaction ? transaction : this.prisma;
 
-    const tagsEntity = await this._getAndCreateTags(tags);
+    const tagsEntity = await this._getAndCreateTags(tags, transaction);
 
-    const createdMeetup = await this.prisma.meetups.create({
+    const createdMeetup = await executer.meetups.create({
       data: {
         ...meetupOptions,
         organizerId: organizerId,
@@ -102,12 +105,17 @@ export class MeetupRepository {
     return { totalRecordsNumber: meetups.length, records: meetups };
   }
 
-  async update(id: number, updateMeetupDto: UpdateMeetupDto): Promise<Meetup> {
+  async update(
+    id: number,
+    updateMeetupDto: UpdateMeetupDto,
+    transaction?: TransactionClient,
+  ): Promise<Meetup> {
     const { tags, ...updateMeetupOptions } = updateMeetupDto;
+    const executer = transaction ? transaction : this.prisma;
 
-    const tagsEntity = await this._getAndCreateTags(tags);
+    const tagsEntity = await this._getAndCreateTags(tags, transaction);
 
-    const updatedMeetup = await this.prisma.meetups.update({
+    const updatedMeetup = await executer.meetups.update({
       where: { id },
       data: {
         ...updateMeetupOptions,
@@ -128,8 +136,10 @@ export class MeetupRepository {
     return updatedMeetup;
   }
 
-  async delete(id: number): Promise<void> {
-    await this.prisma.meetups.update({
+  async delete(id: number, transaction?: TransactionClient): Promise<void> {
+    const executer = transaction ? transaction : this.prisma;
+
+    await executer.meetups.update({
       where: { id },
       data: {
         tags: {
@@ -138,12 +148,80 @@ export class MeetupRepository {
       },
     });
 
-    await this.prisma.meetups.delete({
+    await executer.meetups.delete({
       where: { id },
     });
   }
 
-  private async _getAndCreateTags(createTagsDto: string[]): Promise<Tag[]> {
+  async joinToMeetup(
+    meetupId: number,
+    memberId: number,
+    transaction?: TransactionClient,
+  ): Promise<Meetup> {
+    const executer = transaction ? transaction : this.prisma;
+    const meetup = await executer.meetups.update({
+      where: { id: meetupId },
+      data: {
+        members: {
+          create: {
+            userId: memberId,
+          },
+        },
+      },
+
+      include: {
+        members: { select: { user: { select: { id: true, email: true } } } },
+      },
+    });
+
+    return meetup;
+  }
+
+  async leaveFromMeetup(
+    meetupId: number,
+    memberId: number,
+    transaction?: TransactionClient,
+  ): Promise<Meetup> {
+    const executer = transaction ? transaction : this.prisma;
+    const meetup = await executer.meetups.update({
+      where: { id: meetupId },
+      data: {
+        members: {
+          deleteMany: {
+            userId: memberId,
+          },
+        },
+      },
+
+      include: {
+        members: { select: { user: { select: { id: true, email: true } } } },
+      },
+    });
+
+    return meetup;
+  }
+
+  async isJoined(
+    meetupId: number,
+    memberId: number,
+    transaction?: TransactionClient,
+  ): Promise<boolean> {
+    const executer = transaction ? transaction : this.prisma;
+
+    const meetups = await executer.meetupsToUsers.findMany({
+      where: {
+        meetupId: meetupId,
+        userId: memberId,
+      },
+    });
+
+    return meetups.length !== 0;
+  }
+
+  private async _getAndCreateTags(
+    createTagsDto: string[],
+    transaction?: TransactionClient,
+  ): Promise<Tag[]> {
     const tags: Tag[] = [];
 
     if (!createTagsDto) return tags;
@@ -153,7 +231,9 @@ export class MeetupRepository {
         title: createTagDto,
       });
       if (!existingTag) {
-        tags.push(await this.tagRepository.create({ title: createTagDto }));
+        tags.push(
+          await this.tagRepository.create({ title: createTagDto }, transaction),
+        );
         continue;
       }
 

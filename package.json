@@ -8,7 +8,7 @@
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
-    "start": "nest start",
+    "start": " nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/apps/gateway/main",
@@ -19,7 +19,12 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./apps/gateway/test/jest-e2e.json",
     "prisma:client": "npx prisma generate --schema ./libs/common/src/prisma/schema.prisma",
-    "prisma:migrate": "dotenv -e ./libs/common/.env -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma"
+    "prisma:migrate": "dotenv -e ./libs/common/.env -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma",
+    "docker:prisma:client": "npx prisma generate --schema ./libs/common/src/prisma/schema.prisma",
+    "docker:prisma:migrate": "dotenv -e ./libs/common/.envDocker -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma",
+    "docker:prisma:seed": "dotenv -e ./libs/common/.envDocker -- ts-node ./libs/common/src/prisma/seeds/seed.ts",
+    "docker:start:auth": "npm run docker:prisma:client && npm run docker:prisma:migrate && npm run docker:prisma:seed || npm run start auth",
+    "docker:start:meetup": "npm run docker:prisma:client && npm run docker:prisma:migrate && npm run docker:prisma:seed || npm run start meetup"
   },
   "dependencies": {
     "@elastic/elasticsearch": "^8.10.0",
@@ -32,18 +37,23 @@
     "@nestjs/passport": "^10.0.2",
     "@nestjs/platform-express": "^10.0.0",
     "@prisma/client": "^5.2.0",
+    "@types/pdfmake": "^0.2.7",
     "amqp-connection-manager": "^4.1.14",
     "amqplib": "^0.10.3",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.6",
+    "csv-stringify": "^6.4.4",
     "dotenv": "^16.3.1",
+    "easy-yandex-s3": "^2.0.0",
     "joi": "^17.10.0",
     "passport": "^0.6.0",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "pdfmake": "^0.2.7",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "uuidv4": "^6.2.13"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.0",
@@ -53,6 +63,7 @@
     "@types/cookie-parser": "^1.4.4",
     "@types/express": "^4.17.17",
     "@types/jest": "^29.5.2",
+    "@types/multer": "^1.4.8",
     "@types/node": "^20.3.1",
     "@types/passport-google-oauth20": "^2.0.12",
     "@types/passport-jwt": "^3.0.10",

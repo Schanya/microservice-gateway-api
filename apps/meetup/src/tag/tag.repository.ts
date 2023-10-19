@@ -1,4 +1,4 @@
-import { PrismaService } from '@app/common';
+import { PrismaService, TransactionClient } from '@app/common';
 import { Injectable } from '@nestjs/common';
 import { CreateTagDto, FindTagDto, Tag, UpdateTagDto } from './dto';
 
@@ -6,8 +6,12 @@ import { CreateTagDto, FindTagDto, Tag, UpdateTagDto } from './dto';
 export class TagRepository {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createTagDto: CreateTagDto): Promise<Tag> {
-    const createdTag = await this.prisma.tags.create({
+  async create(
+    createTagDto: CreateTagDto,
+    transaction?: TransactionClient,
+  ): Promise<Tag> {
+    const executer = transaction ? transaction : this.prisma;
+    const createdTag = await executer.tags.create({
       data: { ...createTagDto },
     });
 

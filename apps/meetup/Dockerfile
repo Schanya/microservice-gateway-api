@@ -2,11 +2,11 @@ FROM uselagoon/node-18
 
 WORKDIR /usr/src/app
 
-COPY package*.json ./
+COPY . . 
 
 RUN npm install
 
-COPY . . 
+RUN npm i dotenv-cli -g
 
 RUN npm run build
 

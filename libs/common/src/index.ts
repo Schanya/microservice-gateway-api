@@ -15,6 +15,7 @@ export * from './dto/base-read-all.dto';
 export * from './dto/jwt-payload.dto';
 export * from './dto/pagination.dto';
 export * from './dto/sorting.dto';
+export * from './dto/avatar.dto';
 
 export * from './types/pagination.type';
 export * from './types/read-all.type';
@@ -23,3 +24,5 @@ export * from './types/sorting.type';
 export * from './schemas/base-read-all.schema';
 export * from './schemas/pagination.schema';
 export * from './schemas/sorting.schema';
+
+export * from './prisma/types/transaction.type';

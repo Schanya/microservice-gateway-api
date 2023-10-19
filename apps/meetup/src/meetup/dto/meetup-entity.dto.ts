@@ -10,4 +10,5 @@ export class Meetup {
   latitude: number;
   longitude: number;
   tags?: { tag: Tag }[];
+  members?: { user: { id: number; email: string } }[];
 }
