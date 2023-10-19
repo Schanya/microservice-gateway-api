@@ -1,4 +1,4 @@
-import { PrismaService } from '@app/common';
+import { PrismaService, TransactionClient } from '@app/common';
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
@@ -22,8 +22,13 @@ export class JwtRepository {
     return token?.refreshToken;
   }
 
-  async saveJwt(userId: number, refreshToken: string): Promise<void> {
-    await this.prisma.tokens.create({
+  async saveJwt(
+    userId: number,
+    refreshToken: string,
+    transaction?: TransactionClient,
+  ): Promise<void> {
+    const executer = transaction ? transaction : this.prisma;
+    await executer.tokens.create({
       data: {
         userId,
         refreshToken,
@@ -31,8 +36,13 @@ export class JwtRepository {
     });
   }
 
-  async deleteJwt(userId: number, refreshToken: string): Promise<void> {
-    await this.prisma.tokens.deleteMany({
+  async deleteJwt(
+    userId: number,
+    refreshToken: string,
+    transaction?: TransactionClient,
+  ): Promise<void> {
+    const executer = transaction ? transaction : this.prisma;
+    await executer.tokens.deleteMany({
       where: {
         userId,
         refreshToken,
@@ -40,8 +50,12 @@ export class JwtRepository {
     });
   }
 
-  async deleteAllJwt(userId: number): Promise<void> {
-    await this.prisma.tokens.deleteMany({
+  async deleteAllJwt(
+    userId: number,
+    transaction?: TransactionClient,
+  ): Promise<void> {
+    const executer = transaction ? transaction : this.prisma;
+    await executer.tokens.deleteMany({
       where: { userId },
     });
   }

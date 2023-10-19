@@ -24,3 +24,5 @@ export * from './types/sorting.type';
 export * from './schemas/base-read-all.schema';
 export * from './schemas/pagination.schema';
 export * from './schemas/sorting.schema';
+
+export * from './prisma/types/transaction.type';
