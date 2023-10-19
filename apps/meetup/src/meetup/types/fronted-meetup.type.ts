@@ -13,6 +13,10 @@ export class FrontendMeetup {
     id?: number;
     title?: string;
   }[];
+  members?: {
+    id?: number;
+    email?: string;
+  }[];
 
   constructor(meetup: Meetup) {
     this.id = meetup?.id;
@@ -26,6 +30,10 @@ export class FrontendMeetup {
     this.tags = meetup?.tags?.map((obj) => ({
       id: obj.tag.id,
       title: obj.tag.title,
+    }));
+    this.members = meetup?.members?.map((member) => ({
+      id: member.user.id,
+      email: member.user.email,
     }));
   }
 }

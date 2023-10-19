@@ -1,0 +1,5 @@
+**/node_modules/
+**/dist
+**/apps/auth/.env
+./apps/gateway/.env
+**/apps/meetup/.env

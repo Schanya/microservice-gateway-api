@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { JwtPayloadDto, PrismaService } from '@app/common';
+import { JwtPayloadDto, PrismaService, TransactionClient } from '@app/common';
 import { RpcException } from '@nestjs/microservices';
 import { compareSync, hash } from 'bcryptjs';
 
@@ -19,13 +19,25 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async registration(createUserDto: CreateUserDto): Promise<FrontendJwt> {
-    const registratedUser = await this.createLocalUser(createUserDto);
+  async registration(
+    createUserDto: CreateUserDto,
+    transaction?: TransactionClient,
+  ): Promise<FrontendJwt> {
+    const transactionResult = await this.prisma.$transaction(
+      async (transaction: TransactionClient) => {
+        const registratedUser = await this.createLocalUser(
+          createUserDto,
+          transaction,
+        );
 
-    const { id, role } = registratedUser;
-    const tokens = await this.loginUser(id, role);
+        const { id, role } = registratedUser;
+        const tokens = await this.loginUser(id, role, transaction);
 
-    return tokens;
+        return tokens;
+      },
+    );
+
+    return transactionResult;
   }
 
   async localLogin(user: JwtPayloadDto): Promise<FrontendJwt> {
@@ -34,23 +46,30 @@ export class AuthService {
     return tokens;
   }
 
-  private async createLocalUser(createUserDto: CreateUserDto): Promise<User> {
+  private async createLocalUser(
+    createUserDto: CreateUserDto,
+    transaction?: TransactionClient,
+  ): Promise<User> {
     const hashPassword = await hash(createUserDto.password, 10);
 
     const user = { ...createUserDto, password: hashPassword };
 
-    const registratedUser = await this.userService.create(user);
+    const registratedUser = await this.userService.create(user, transaction);
 
     return registratedUser;
   }
 
-  private async loginUser(id: number, role: string): Promise<FrontendJwt> {
+  private async loginUser(
+    id: number,
+    role: string,
+    transaction?: TransactionClient,
+  ): Promise<FrontendJwt> {
     const payload = { id, role };
 
     const accessToken = await this.jwtService.generateAccessJwt(payload);
     const refreshToken = await this.jwtService.generateRefreshJwt(payload);
 
-    await this.jwtService.saveJwt(id, refreshToken);
+    await this.jwtService.saveJwt(id, refreshToken, transaction);
 
     return { accessToken, refreshToken };
   }
@@ -62,52 +81,71 @@ export class AuthService {
   async refresh(
     jwtPayload: JwtPayloadDto,
     refreshToken: string,
+    transaction?: TransactionClient,
   ): Promise<FrontendJwt> {
-    const { id, role } = jwtPayload;
-    const token = await this.jwtService.getJwt(id, refreshToken);
+    const transactionResult = await this.prisma.$transaction(
+      async (transaction: TransactionClient) => {
+        const { id, role } = jwtPayload;
+        const token = await this.jwtService.getJwt(id, refreshToken);
 
-    if (!token) {
-      await this.jwtService.deleteAllJwt(id);
+        if (!token) {
+          await this.jwtService.deleteAllJwt(id, transaction);
 
-      throw new RpcException({
-        message: 'Unauthorized user',
-        statusCode: HttpStatus.UNAUTHORIZED,
-      });
-    }
+          throw new RpcException({
+            message: 'Unauthorized user',
+            statusCode: HttpStatus.UNAUTHORIZED,
+          });
+        }
 
-    const isValidToken = await this.jwtService.isValidRefreshJwt(token);
+        const isValidToken = await this.jwtService.isValidRefreshJwt(token);
 
-    if (!isValidToken) {
-      await this.jwtService.deleteJwt(id, refreshToken);
-      throw new RpcException({
-        message: 'Unauthorized user',
-        statusCode: HttpStatus.UNAUTHORIZED,
-      });
-    }
+        if (!isValidToken) {
+          await this.jwtService.deleteJwt(id, refreshToken, transaction);
+          throw new RpcException({
+            message: 'Unauthorized user',
+            statusCode: HttpStatus.UNAUTHORIZED,
+          });
+        }
 
-    await this.jwtService.deleteJwt(id, refreshToken);
+        await this.jwtService.deleteJwt(id, refreshToken, transaction);
 
-    const tokens = await this.loginUser(id, role);
+        const tokens = await this.loginUser(id, role, transaction);
 
-    return tokens;
+        return tokens;
+      },
+    );
+
+    return transactionResult;
   }
 
-  async googleLogin(googleUser: GoogleUserDto) {
-    const { email } = googleUser;
+  async googleLogin(
+    googleUser: GoogleUserDto,
+    transaction?: TransactionClient,
+  ) {
+    const transactionResult = await this.prisma.$transaction(
+      async (transaction: TransactionClient) => {
+        const { email } = googleUser;
 
-    let user = await this.userService.readByUniqueField({ email });
+        let user = await this.userService.readByUniqueField({ email });
 
-    if (!user) {
-      user = await this.createGoogleUser(googleUser);
-    }
+        if (!user) {
+          user = await this.createGoogleUser(googleUser, transaction);
+        }
 
-    const { id, role } = user;
-    const tokens = await this.loginUser(id, role);
+        const { id, role } = user;
+        const tokens = await this.loginUser(id, role, transaction);
 
-    return tokens;
+        return tokens;
+      },
+    );
+
+    return transactionResult;
   }
 
-  private async createGoogleUser(googleUser: GoogleUserDto): Promise<User> {
+  private async createGoogleUser(
+    googleUser: GoogleUserDto,
+    transaction?: TransactionClient,
+  ): Promise<User> {
     const { firstName, email } = googleUser;
 
     const user: CreateUserDto = {
@@ -117,7 +155,7 @@ export class AuthService {
       provider: 'GOOGLE',
     };
 
-    const registratedUser = await this.userService.create(user);
+    const registratedUser = await this.userService.create(user, transaction);
     return registratedUser;
   }
 

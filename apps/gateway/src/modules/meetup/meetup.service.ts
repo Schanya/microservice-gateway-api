@@ -1,8 +1,8 @@
-import { JwtPayloadDto, ReadAllResult } from '@app/common';
-import { sendMessage } from '@gateway/common/utils';
 import { Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 
+import { JwtPayloadDto, ReadAllResult } from '@app/common';
+import { sendMessage } from '@gateway/common/utils';
 import { stringify } from 'csv-stringify';
 import { CreateMeetupDto, UpdateMeetupDto } from './dto';
 import {
@@ -26,21 +26,19 @@ export class MeetupService {
     createMeetupDto: CreateMeetupDto,
     organizer: JwtPayloadDto,
   ): Promise<FrontendMeetup> {
-    const createdMeetup = await sendMessage<FrontendMeetup>({
-      client: this.client,
-      metadata: 'MEETUP_CREATE',
-      data: { createMeetupDto, organizer },
-    });
+    const createdMeetup = await this._sendMessageFromClient<FrontendMeetup>(
+      'MEETUP_CREATE',
+      { createMeetupDto, organizer },
+    );
 
     return createdMeetup;
   }
 
   async readById(id: string): Promise<FrontendMeetup> {
-    const meetup: FrontendMeetup = await sendMessage({
-      client: this.client,
-      metadata: 'MEETUP_GET_BY_ID',
-      data: { id },
-    });
+    const meetup: FrontendMeetup = await this._sendMessageFromClient(
+      'MEETUP_GET_BY_ID',
+      { id },
+    );
 
     return meetup;
   }
@@ -48,21 +46,18 @@ export class MeetupService {
   async readAll(
     options: IReadAllMeetupOptions,
   ): Promise<ReadAllResult<FrontendMeetup>> {
-    const meetups = await sendMessage<ReadAllResult<FrontendMeetup>>({
-      client: this.client,
-      metadata: 'MEETUP_GET_ALL',
-      data: { options },
-    });
+    const meetups = await this._sendMessageFromClient<
+      ReadAllResult<FrontendMeetup>
+    >('MEETUP_GET_ALL', { options });
 
     return meetups;
   }
 
   async esSearch(searchText: string): Promise<MeetupSearchResult> {
-    const searchResult = await sendMessage<MeetupSearchResult>({
-      client: this.client,
-      metadata: 'MEETUP_ES',
-      data: { searchText },
-    });
+    const searchResult = await this._sendMessageFromClient<MeetupSearchResult>(
+      'MEETUP_ES',
+      { searchText },
+    );
 
     return searchResult;
   }
@@ -71,21 +66,16 @@ export class MeetupService {
     id: number,
     updateMeetupDto: UpdateMeetupDto,
   ): Promise<FrontendMeetup> {
-    const updatedMeetup = await sendMessage<FrontendMeetup>({
-      client: this.client,
-      metadata: 'MEETUP_UPDATE',
-      data: { id, updateMeetupDto },
-    });
+    const updatedMeetup = await this._sendMessageFromClient<FrontendMeetup>(
+      'MEETUP_UPDATE',
+      { id, updateMeetupDto },
+    );
 
     return updatedMeetup;
   }
 
   async delete(id: number): Promise<void> {
-    await sendMessage({
-      client: this.client,
-      metadata: 'MEETUP_DELETE',
-      data: { id },
-    });
+    await this._sendMessageFromClient('MEETUP_DELETE', { id });
   }
 
   async generateCsvReport(options: IReadAllMeetupOptions): Promise<any> {
@@ -128,5 +118,38 @@ export class MeetupService {
         reject(err);
       }
     });
+  }
+
+  async joinToMeetup(
+    meetupId: number,
+    member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await this._sendMessageFromClient<FrontendMeetup>(
+      'MEETUP_JOIN',
+      { meetupId, member },
+    );
+
+    return meetup;
+  }
+
+  async leaveFromMeetup(
+    meetupId: number,
+    member: JwtPayloadDto,
+  ): Promise<FrontendMeetup> {
+    const meetup = await this._sendMessageFromClient<FrontendMeetup>(
+      'MEETUP_LEAVE',
+      { meetupId, member },
+    );
+
+    return meetup;
+  }
+
+  private async _sendMessageFromClient<T>(
+    metadata: string,
+    data: any,
+  ): Promise<T> {
+    const res = await sendMessage<T>({ client: this.client, metadata, data });
+
+    return res;
   }
 }

@@ -1,6 +1,7 @@
 import {
   PrismaService,
   ReadAllResult,
+  TransactionClient,
   defaultPagination,
   defaultSorting,
 } from '@app/common';
@@ -31,8 +32,12 @@ export class UserRepository {
     return { totalRecordsNumber: users.length, records: users };
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const createdUser = await this.prisma.users.create({
+  async create(
+    createUserDto: CreateUserDto,
+    transaction?: TransactionClient,
+  ): Promise<User> {
+    const executer = transaction ? transaction : this.prisma;
+    const createdUser = await executer.users.create({
       data: { ...createUserDto, role: 'USER' },
     });
 
@@ -47,8 +52,13 @@ export class UserRepository {
     return user.length ? user[0] : null;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    const user = await this.prisma.users.update({
+  async update(
+    id: number,
+    updateUserDto: UpdateUserDto,
+    transaction?: TransactionClient,
+  ): Promise<User> {
+    const executer = transaction ? transaction : this.prisma;
+    const user = await executer.users.update({
       where: { id },
       data: { ...updateUserDto },
     });
@@ -56,8 +66,9 @@ export class UserRepository {
     return user;
   }
 
-  async delete(id: number): Promise<void> {
-    await this.prisma.users.delete({
+  async delete(id: number, transaction?: TransactionClient): Promise<void> {
+    const executer = transaction ? transaction : this.prisma;
+    await executer.users.delete({
       where: { id },
     });
   }

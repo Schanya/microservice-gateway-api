@@ -1,4 +1,10 @@
-QUEUE_MEETUP_SERVICE='meetup_queue'
+RABBIT_MQ_MEETUP_QUEUE='RABBIT_MQ_MEETUP_QUEUE'
 RABBIT_MQ_URI='amqp://rabbitmq:5672'
 
 DATABASE_URL="postgresql://postgres:postgres@postgres:5432/meetup_micro_db?schema=public"
+
+ELASTICSEARCH_NODE='http://elasticsearch:9200'
+ELASTICSEARCH_USERNAME='elastic'
+ELASTICSEARCH_PASSWORD='rxI2de2zHgnmKYkfToDh'
+
+
