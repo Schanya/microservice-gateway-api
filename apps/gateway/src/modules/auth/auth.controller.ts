@@ -23,6 +23,7 @@ import {
   RefreshGuard,
 } from '@gateway/common/guards';
 import { JoiValidationPipe } from '@gateway/common/pipes';
+import { setCookie } from '@gateway/common/utils';
 
 @Controller('auth')
 export class AuthController {
@@ -36,9 +37,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
     createUserDto.provider = 'LOCAL';
-    const tokens = await this.authService.register(createUserDto);
+    const secretData = await this.authService.register(createUserDto);
 
-    res.cookie('auth-cookie', tokens, { httpOnly: true, sameSite: true });
+    setCookie(res, secretData);
   }
 
   @UseGuards(LocalAuthGuard)
@@ -51,7 +52,7 @@ export class AuthController {
     user.provider = 'LOCAL';
     const secretData = await this.authService.login(user);
 
-    res.cookie('auth-cookie', secretData, { httpOnly: true, sameSite: true });
+    setCookie(res, secretData);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -64,7 +65,7 @@ export class AuthController {
   ): Promise<void> {
     await this.authService.logout(userPayload, token);
 
-    res.cookie('auth-cookie', null, { httpOnly: true, sameSite: true });
+    setCookie(res, null);
   }
 
   @UseGuards(RefreshGuard)
@@ -75,9 +76,9 @@ export class AuthController {
     @GetTokens('refreshToken') token: string,
     @Res({ passthrough: true }) res: Response,
   ): Promise<void> {
-    const tokens = await this.authService.refresh(userPayload, token);
+    const secretData = await this.authService.refresh(userPayload, token);
 
-    res.cookie('auth-cookie', tokens, { httpOnly: true, sameSite: true });
+    setCookie(res, secretData);
   }
 
   @Get('google')
@@ -91,8 +92,8 @@ export class AuthController {
     googleUser: GoogleUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const tokens = await this.authService.googleLogin(googleUser);
+    const secretData = await this.authService.googleLogin(googleUser);
 
-    res.cookie('auth-cookie', tokens, { httpOnly: true, sameSite: true });
+    setCookie(res, secretData);
   }
 }
