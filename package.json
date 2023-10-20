@@ -21,8 +21,8 @@
     "prisma:client": "npx prisma generate --schema ./libs/common/src/prisma/schema.prisma",
     "prisma:migrate": "dotenv -e ./libs/common/.env -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma",
     "docker:prisma:client": "npx prisma generate --schema ./libs/common/src/prisma/schema.prisma",
-    "docker:prisma:migrate": "dotenv -e ./libs/common/.envDocker -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma",
-    "docker:prisma:seed": "dotenv -e ./libs/common/.envDocker -- ts-node ./libs/common/src/prisma/seeds/seed.ts",
+    "docker:prisma:migrate": "dotenv -e ./libs/common/.docker.env -- npx prisma migrate dev --schema=./libs/common/src/prisma/schema.prisma",
+    "docker:prisma:seed": "dotenv -e ./libs/common/.docker.env -- ts-node ./libs/common/src/prisma/seeds/seed.ts",
     "docker:start:auth": "npm run docker:prisma:client && npm run docker:prisma:migrate && npm run docker:prisma:seed || npm run start auth",
     "docker:start:meetup": "npm run docker:prisma:client && npm run docker:prisma:migrate && npm run docker:prisma:seed || npm run start meetup"
   },

@@ -15,7 +15,7 @@ services:
       dockerfile: ./apps/auth/Dockerfile
     command: npm run docker:start:auth
     env_file:
-      - ./apps/auth/.envDocker
+      - ./apps/auth/.docker.env
     depends_on:
       - postgres
       - rabbitmq
@@ -31,7 +31,7 @@ services:
       dockerfile: ./apps/meetup/Dockerfile
     command:  npm run docker:start:meetup
     env_file:
-      - ./apps/meetup/.envDocker
+      - ./apps/meetup/.docker.env
     depends_on:
       - postgres
       - rabbitmq
@@ -48,7 +48,7 @@ services:
       dockerfile: ./apps/gateway/Dockerfile
     command: npm run start:dev gateway
     env_file:
-      - ./apps/gateway/.envDocker
+      - ./apps/gateway/.docker.env
     depends_on:
       - meetup
       - auth
